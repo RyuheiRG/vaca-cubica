@@ -57,7 +57,7 @@ pnpm --version
 ## 🚀 FASE 3: CLONACIÓN Y WORKSPACE
 
 ```bash
-git clone [https://github.com/RyuheiRG/vaca-cubica](https://github.com/RyuheiRG/vaca-cubica)
+git clone https://github.com/RyuheiRG/vaca-cubica.git
 ```
 
 ```bash
