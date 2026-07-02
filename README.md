@@ -14,8 +14,7 @@ Antes de clonar este repositorio, el sistema operativo de desarrollo debe contar
 1. **Node.js (LTS 20.x o superior)**
 2. **Python (3.10 o superior)**
 3. **Git**
-4. **Visual Studio Code (VSCode)**
-5. **DBngin** (Para instanciar MySQL 8.4 localmente).
+4. **DBngin** (Para instanciar MySQL 8.4 localmente).
 
 ---
 
@@ -37,35 +36,47 @@ Abre tu terminal estándar y ejecuta en orden:
 
 # Habilita el puente de versiones de Node
 
+```bash
 corepack enable
+```
 
 # Descarga y activa la versión más reciente de pnpm
 
+```bash
 corepack prepare pnpm@latest --activate
+```
 
 # Verifica la instalación (Debe regresar versión 9.x.x o superior)
 
+```bash
 pnpm --version
+```
 
 ---
 
 ## 🚀 FASE 3: CLONACIÓN Y WORKSPACE
 
-git clone [https://github.com/RyuheiRG/vaca-cubica](https://github.com/TU_USUARIO/vaca-cubica.git)
+```bash
+git clone [https://github.com/RyuheiRG/vaca-cubica](https://github.com/RyuheiRG/vaca-cubica)
+```
 
+```bash
 cd vaca-cubica
+```
 
+```bash
 code .
+```
 
 ---
 
-## ⚛️ FASE 5: INICIALIZACIÓN DEL FRONTEND (React)
+## ⚛️ FASE 4: INICIALIZACIÓN DEL FRONTEND (React)
 
 # Navega al contenedor del cliente
 
 cd frontend
 
-# Instala el árbol de dependencias usando pnpm (NO usar npm)
+# Instala el árbol de dependencias usando pnpm
 
 pnpm install
 
