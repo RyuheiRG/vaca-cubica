@@ -1,0 +1,139 @@
+/* src/components/ConfirmDeleteModal.css */
+
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.confirm-content {
+  background: #ffffff;
+  border-radius: var(--border-radius-lg);
+  width: 100%;
+  max-width: 420px;
+  padding: 2rem;
+  position: relative;
+  text-align: center;
+  box-shadow: var(--shadow-md);
+}
+
+.confirm-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: transparent;
+  border: none;
+  font-size: 1.1rem;
+  color: #999;
+  cursor: pointer;
+}
+
+.confirm-icon-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.confirm-icon-circle {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #fde8ec;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.confirm-title {
+  font-size: 1.4rem;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+}
+
+.confirm-warning {
+  background: #fff4e5;
+  border: 1px solid #f5c98a;
+  color: #b45309;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 0.6rem 1rem;
+  border-radius: var(--border-radius-md);
+  margin-bottom: 1.25rem;
+}
+
+.confirm-question {
+  color: #555;
+  margin-bottom: 1.25rem;
+}
+
+.confirm-item-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: #f4f6f8;
+  border-radius: var(--border-radius-md);
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+
+.confirm-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--bg-sidebar);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.confirm-item-name {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.confirm-item-meta {
+  font-size: 0.85rem;
+  color: #777;
+}
+
+.confirm-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.confirm-btn-delete,
+.confirm-btn-cancel {
+  flex: 1;
+  padding: 0.85rem;
+  border: none;
+  border-radius: 999px;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.confirm-btn-delete {
+  background-color: var(--danger-red);
+  color: #ffffff;
+}
+
+.confirm-btn-cancel {
+  background-color: var(--bg-sidebar);
+  color: #ffffff;
+}
+
+.confirm-btn-delete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}

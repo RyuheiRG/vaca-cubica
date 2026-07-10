@@ -1,0 +1,46 @@
+.catalogo-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.catalogo-card {
+  background: #ffffff;
+  border-radius: var(--border-radius-md);
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+}
+
+.catalogo-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.catalogo-card-header h3 span {
+  color: #999;
+  font-weight: 400;
+  font-size: 0.9rem;
+}
+
+.catalogo-search {
+  position: relative;
+  width: 280px;
+}
+
+.catalogo-search input {
+  width: 100%;
+  padding: 0.6rem 0.75rem 0.6rem 2.2rem;
+  border: 1px solid #ddd;
+  border-radius: var(--border-radius-md);
+  font-size: 0.9rem;
+}
+
+.catalogo-search svg {
+  position: absolute;
+  left: 0.7rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #999;
+}
