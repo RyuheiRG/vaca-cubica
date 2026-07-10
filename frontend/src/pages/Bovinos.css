@@ -1,0 +1,42 @@
+.bovinos-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.bovino-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.bovino-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #f1f3f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #666;
+}
+
+.bovino-name {
+  font-weight: 700;
+  color: #333;
+}
+
+.bovino-code {
+  font-size: 0.8rem;
+  color: #999;
+}
+
+.bovinos-card {
+  background: #ffffff;
+  border-radius: var(--border-radius-md);
+  margin-top: 1.5rem;
+  overflow: hidden;
+}

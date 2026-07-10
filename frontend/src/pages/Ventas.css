@@ -1,21 +1,23 @@
-.catalogo-header-top {
+.ventas-header-top {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
-.catalogo-card {
+.ventas-card {
   background: #ffffff;
   border-radius: var(--border-radius-md);
   margin-top: 1.5rem;
   padding: 1.5rem;
 }
 
-.catalogo-card-header {
+.ventas-card-header {
   margin-bottom: 0.5rem;
 }
 
-.catalogo-card-header h3 span {
+.ventas-card-header h3 span {
   color: #999;
   font-weight: 400;
   font-size: 0.9rem;

@@ -1,0 +1,23 @@
+.stat-card {
+  background: #ffffff;
+  border-radius: var(--border-radius-md);
+  padding: 1.25rem 1.5rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: #777;
+  margin-bottom: 0.4rem;
+}
+
+.stat-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+.stat-neutral { color: #333; }
+.stat-info { color: #0ea5e9; }
+.stat-success { color: #2e7d32; }
+.stat-danger { color: #e11d48; }
+.stat-warning { color: #b45309; }

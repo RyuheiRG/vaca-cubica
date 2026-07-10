@@ -1,0 +1,78 @@
+.filter-bar-wrapper {
+  background: #ffffff;
+  border-radius: var(--border-radius-md);
+  margin-top: 1.5rem;
+  overflow: hidden;
+}
+
+.filter-bar {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding: 1rem;
+}
+
+.filter-search {
+  position: relative;
+  flex: 1;
+  min-width: 220px;
+}
+
+.filter-search svg {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #999;
+}
+
+.filter-search input {
+  width: 100%;
+  padding: 0.65rem 0.75rem 0.65rem 2.3rem;
+  border: 1px solid #ddd;
+  border-radius: var(--border-radius-md);
+  font-size: 0.9rem;
+}
+
+.filter-select {
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: var(--border-radius-md);
+  font-size: 0.9rem;
+  color: #555;
+  min-width: 140px;
+}
+
+.filter-more-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.65rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: var(--border-radius-md);
+  background: #ffffff;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #333;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.filter-more-btn.active {
+  background: #e8f5e9;
+  border-color: var(--brand-green);
+  color: var(--brand-green);
+}
+
+.chevron-up {
+  transform: rotate(180deg);
+}
+
+.filter-bar-more {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding: 0 1rem 1rem;
+  border-top: 1px solid #eee;
+  padding-top: 1rem;
+}

@@ -1,21 +1,30 @@
-.catalogo-header-top {
+.bitacora-header-top {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
-.catalogo-card {
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.bitacora-card {
   background: #ffffff;
   border-radius: var(--border-radius-md);
   margin-top: 1.5rem;
   padding: 1.5rem;
 }
 
-.catalogo-card-header {
+.bitacora-card-header {
   margin-bottom: 0.5rem;
 }
 
-.catalogo-card-header h3 span {
+.bitacora-card-header h3 span {
   color: #999;
   font-weight: 400;
   font-size: 0.9rem;

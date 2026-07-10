@@ -1,12 +1,15 @@
-import {useState} from "react";
+import {useState, useMemo} from "react";
 import {User, ArrowRight} from "lucide-react";
 import Button from "../components/Button";
 import DataTable from "../components/DataTable";
 import Modal from "../components/Modal";
 import ConfirmDeleteModal from "../components/ConfirmDeleteModal";
 import Toast from "../components/Toast";
+import Tabs from "../components/Tabs";
+import FilterBar from "../components/FilterBar";
 import VentaForm from "../components/VentaForm";
 import ClienteForm from "../components/ClienteForm";
+import "./Ventas.css";
 
 const ventaColumns = [
   {key: "idTransaccion", label: "ID Transacción"},
@@ -44,7 +47,28 @@ const emptyCliente = {
   notas: "",
 };
 
+const filterConfig = {
+  movimientos: {
+    placeholder: "Bus car por cliente, ID de transacción...",
+    filters: [
+      {key: "categoria", placeholder: "Categoría", options: ["Venta", "Renta"]},
+    ],
+  },
+  clientes: {
+    placeholder: "Buscar por nombre, correo...",
+    filters: [
+      {
+        key: "tipo",
+        placeholder: "Tipo",
+        options: ["Agro", "Particular", "Distribuidor"],
+      },
+    ],
+  },
+};
+
 const Ventas = () => {
+  const [activeTab, setActiveTab] = useState("movimientos");
+
   // ---------- ESTADOS ----------
   const [ventas, setVentas] = useState([
     {
@@ -74,6 +98,69 @@ const Ventas = () => {
       amount: "$7,000.00",
       date: "20/05/2024",
     },
+    {
+      id: 4,
+      idTransaccion: "TX-004",
+      idBovino: "VC-104",
+      nombreCliente: "La Hacienda",
+      categoria: "Venta",
+      amount: "$4,200.00",
+      date: "21/05/2024",
+    },
+    {
+      id: 5,
+      idTransaccion: "TX-005",
+      idBovino: "VC-105",
+      nombreCliente: "Rancho Verde",
+      categoria: "Renta",
+      amount: "$1,200.00",
+      date: "22/05/2024",
+    },
+    {
+      id: 6,
+      idTransaccion: "TX-006",
+      idBovino: "VC-106",
+      nombreCliente: "Agro El Sol",
+      categoria: "Venta",
+      amount: "$8,500.00",
+      date: "23/05/2024",
+    },
+    {
+      id: 7,
+      idTransaccion: "TX-007",
+      idBovino: "VC-107",
+      nombreCliente: "Distribuciones MX",
+      categoria: "Venta",
+      amount: "$3,750.00",
+      date: "24/05/2024",
+    },
+    {
+      id: 8,
+      idTransaccion: "TX-008",
+      idBovino: "VC-108",
+      nombreCliente: "La Hacienda",
+      categoria: "Renta",
+      amount: "$900.00",
+      date: "25/05/2024",
+    },
+    {
+      id: 9,
+      idTransaccion: "TX-009",
+      idBovino: "VC-109",
+      nombreCliente: "Rancho Verde",
+      categoria: "Venta",
+      amount: "$5,300.00",
+      date: "26/05/2024",
+    },
+    {
+      id: 10,
+      idTransaccion: "TX-010",
+      idBovino: "VC-110",
+      nombreCliente: "Distribuciones MX",
+      categoria: "Venta",
+      amount: "$2,600.00",
+      date: "27/05/2024",
+    },
   ]);
 
   const [clientes, setClientes] = useState([
@@ -85,10 +172,90 @@ const Ventas = () => {
       telefono: "614-123-4567",
       correo: "contacto@agroelsol.com",
     },
+    {
+      id: 2,
+      idCliente: "CLI-002",
+      nombre: "Ganadería Los Andes",
+      tipo: "Agro",
+      telefono: "555-987-6543",
+      correo: "info@ganaderiaaandes.com",
+    },
+    {
+      id: 3,
+      idCliente: "CLI-003",
+      nombre: "Juan Carlos García",
+      tipo: "Particular",
+      telefono: "666-234-5678",
+      correo: "jcgarcia@email.com",
+    },
+    {
+      id: 4,
+      idCliente: "CLI-004",
+      nombre: "Distribuciones MX",
+      tipo: "Distribuidor",
+      telefono: "777-456-7890",
+      correo: "ventas@distribucionesmx.com",
+    },
+    {
+      id: 5,
+      idCliente: "CLI-005",
+      nombre: "Rancho Verde",
+      tipo: "Agro",
+      telefono: "888-345-2109",
+      correo: "contacto@ranchverde.com",
+    },
+    {
+      id: 6,
+      idCliente: "CLI-006",
+      nombre: "María López Hernández",
+      tipo: "Particular",
+      telefono: "999-567-8901",
+      correo: "mlopez@email.com",
+    },
+    {
+      id: 7,
+      idCliente: "CLI-007",
+      nombre: "Carnicería El Primo",
+      tipo: "Distribuidor",
+      telefono: "444-789-0123",
+      correo: "carnes@elprimomx.com",
+    },
+    {
+      id: 8,
+      idCliente: "CLI-008",
+      nombre: "Exportaciones Ganaderas",
+      tipo: "Agro",
+      telefono: "333-012-3456",
+      correo: "export@ganaderas.mx",
+    },
+    {
+      id: 9,
+      idCliente: "CLI-009",
+      nombre: "Roberto Fernández",
+      tipo: "Particular",
+      telefono: "222-234-5678",
+      correo: "rfernandez@email.com",
+    },
+    {
+      id: 10,
+      idCliente: "CLI-010",
+      nombre: "Supermercados Nacionales",
+      tipo: "Distribuidor",
+      telefono: "111-890-1234",
+      correo: "compras@supermercadosnac.com",
+    },
+    {
+      id: 11,
+      idCliente: "CLI-011",
+      nombre: "Riqueza Ganadera",
+      tipo: "Agro",
+      telefono: "555-111-2233",
+      correo: "riqueza@ganaderamx.com",
+    },
   ]);
 
-  const [editingRow, setEditingRow] = useState(null); // venta en edición
-  const [rowToDelete, setRowToDelete] = useState(null); // venta a borrar
+  const [editingRow, setEditingRow] = useState(null);
+  const [rowToDelete, setRowToDelete] = useState(null);
   const [toast, setToast] = useState(null);
 
   const [showVentaModal, setShowVentaModal] = useState(false);
@@ -97,8 +264,60 @@ const Ventas = () => {
   const [showClienteModal, setShowClienteModal] = useState(false);
   const [newCliente, setNewCliente] = useState(emptyCliente);
 
-  const [editingCliente, setEditingCliente] = useState(null); // cliente en edición
-  const [clienteToDelete, setClienteToDelete] = useState(null); // cliente a borrar
+  const [editingCliente, setEditingCliente] = useState(null);
+  const [clienteToDelete, setClienteToDelete] = useState(null);
+
+  // NUEVO: búsqueda y filtros
+  const [search, setSearch] = useState("");
+  const [filterValues, setFilterValues] = useState({});
+
+  const tabs = [
+    {key: "movimientos", label: "Movimientos", count: ventas.length},
+    {key: "clientes", label: "Clientes", count: clientes.length},
+  ];
+
+  // NUEVO: datos filtrados según pestaña activa
+  const filteredVentas = useMemo(() => {
+    let result = ventas;
+    if (search.trim()) {
+      const term = search.toLowerCase();
+      result = result.filter((row) =>
+        Object.values(row).some((val) =>
+          String(val).toLowerCase().includes(term),
+        ),
+      );
+    }
+    if (filterValues.categoria) {
+      result = result.filter((row) => row.categoria === filterValues.categoria);
+    }
+    return result;
+  }, [ventas, search, filterValues]);
+
+  const filteredClientes = useMemo(() => {
+    let result = clientes;
+    if (search.trim()) {
+      const term = search.toLowerCase();
+      result = result.filter((row) =>
+        Object.values(row).some((val) =>
+          String(val).toLowerCase().includes(term),
+        ),
+      );
+    }
+    if (filterValues.tipo) {
+      result = result.filter((row) => row.tipo === filterValues.tipo);
+    }
+    return result;
+  }, [clientes, search, filterValues]);
+
+  const handleTabChange = (key) => {
+    setActiveTab(key);
+    setSearch("");
+    setFilterValues({});
+  };
+
+  const handleFilterChange = (key, value) => {
+    setFilterValues((prev) => ({...prev, [key]: value}));
+  };
 
   // ---------- HANDLERS: VENTAS ----------
   const handleEdit = (row) => setEditingRow(row);
@@ -178,8 +397,12 @@ const Ventas = () => {
   // ---------- RENDER ----------
   return (
     <div>
-      <h1>Ventas</h1>
-      <p>Registro de ventas y transacciones</p>
+      <div className="ventas-header-top">
+        <div>
+          <h1>Ventas</h1>
+          <p>Registro de ventas y transacciones</p>
+        </div>
+      </div>
 
       <div style={{display: "flex", gap: "1rem", marginTop: "1.5rem"}}>
         <Button icon="+" onClick={() => setShowVentaModal(true)}>
@@ -190,25 +413,50 @@ const Ventas = () => {
         </Button>
       </div>
 
-      <h3 style={{marginTop: "2rem"}}>
-        Listado General de Movimientos y Clientes
-      </h3>
+      <Tabs tabs={tabs} activeTab={activeTab} onChange={handleTabChange} />
 
-      <DataTable
-        columns={ventaColumns}
-        data={ventas}
-        onEdit={handleEdit}
-        onDelete={handleDeleteClick}
+      <FilterBar
+        search={search}
+        onSearchChange={setSearch}
+        searchPlaceholder={filterConfig[activeTab].placeholder}
+        filters={filterConfig[activeTab].filters}
+        filterValues={filterValues}
+        onFilterChange={handleFilterChange}
       />
 
-      <h3 style={{marginTop: "2.5rem"}}>Catálogo de Clientes</h3>
+      {activeTab === "movimientos" && (
+        <div className="ventas-card">
+          <div className="ventas-card-header">
+            <h3>
+              Listado General de Movimientos{" "}
+              <span>— {filteredVentas.length} registros</span>
+            </h3>
+          </div>
+          <DataTable
+            columns={ventaColumns}
+            data={filteredVentas}
+            onEdit={handleEdit}
+            onDelete={handleDeleteClick}
+          />
+        </div>
+      )}
 
-      <DataTable
-        columns={clienteColumns}
-        data={clientes}
-        onEdit={handleEditCliente}
-        onDelete={handleDeleteClienteClick}
-      />
+      {activeTab === "clientes" && (
+        <div className="ventas-card">
+          <div className="ventas-card-header">
+            <h3>
+              Catálogo de Clientes{" "}
+              <span>— {filteredClientes.length} registros</span>
+            </h3>
+          </div>
+          <DataTable
+            columns={clienteColumns}
+            data={filteredClientes}
+            onEdit={handleEditCliente}
+            onDelete={handleDeleteClienteClick}
+          />
+        </div>
+      )}
 
       {/* Editar venta existente */}
       <Modal
