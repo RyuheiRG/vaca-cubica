@@ -516,7 +516,6 @@ const Bitacora = () => {
         sexo: newItem.sexo,
         peso: newItem.peso,
         fecha: newItem.fecha,
-        raza: getBovinoByCodigo(newItem.madre).tipoRaza,
       });
     }
 

@@ -15,7 +15,7 @@ import "./Catalogo.css";
 
 const Catalogo = () => {
   const {razas, setRazas} = useRazas();
-  const {bovinos} = useBovinos();
+  const {bovinos, getBovinoByCodigo} = useBovinos();
   const {crias, setCrias} = useCrias();
   const {alimentos, setAlimentos} = useAlimentos();
   const nombresRazas = razas.map((r) => r.nombre);
@@ -160,7 +160,11 @@ const Catalogo = () => {
         {key: "codigo", label: "ID"},
         {key: "nombre", label: "Nombre"},
         {key: "sexo", label: "Sexo", badge: true},
-        {key: "raza", label: "Raza"},
+        {
+          key: "raza",
+          label: "Raza",
+          render: (row) => getBovinoByCodigo(row.madre).tipoRaza,
+        },
         {key: "madre", label: "Madre"},
         {key: "fechaNacimiento", label: "F. Nacimiento"},
         {key: "pesoActual", label: "Peso Actual"},
@@ -174,7 +178,6 @@ const Catalogo = () => {
           type: "select",
           options: ["Macho", "Hembra"],
         },
-        {key: "raza", label: "Raza", type: "select", options: nombresRazas},
         {
           key: "madre",
           label: "Madre (ID Bovino)",
