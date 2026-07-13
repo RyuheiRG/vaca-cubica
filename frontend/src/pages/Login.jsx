@@ -8,8 +8,8 @@ import "./Login.css";
 
 // Credenciales temporales mientras se conecta la autenticación real (JWT).
 // TODO: eliminar esto cuando exista el backend de login.
-const TEMP_EMAIL = "admin@vacacubica.com";
-const TEMP_PASSWORD = "vaca123";
+const TEMP_EMAIL = "admin@pedro.com";
+const TEMP_PASSWORD = "vaca_segura_123";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -46,6 +46,7 @@ const Login = () => {
       >
         <div className="login-brand">
           <img src={VacaCubicaLogo} alt="Vaca Cúbica" />
+          <h1>VACA CUBICA</h1>
           <p>Gestión Bovina</p>
         </div>
       </div>
