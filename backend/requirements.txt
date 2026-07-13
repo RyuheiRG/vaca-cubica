@@ -1,0 +1,18 @@
+# Librerias
+
+# Framework y Servidor
+fastapi==0.111.0
+uvicorn==0.30.1
+
+# ORM y Driver de Base de Datos Asíncrono
+SQLAlchemy==2.0.31
+asyncmy==0.2.11
+
+# Validación y Entorno (Zero Trust)
+pydantic==2.8.2
+pydantic-settings==2.4.0
+
+# Seguridad Criptográfica Moderna
+cryptography==42.0.8
+bcrypt==4.1.3
+PyJWT==2.8.0
