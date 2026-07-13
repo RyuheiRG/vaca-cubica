@@ -6,6 +6,11 @@ import VacaCubicaLogo from "../assets/vaca-cubica-icon-sesion.png";
 import CowFieldImg from "../assets/vaca.png";
 import "./Login.css";
 
+// Credenciales temporales mientras se conecta la autenticación real (JWT).
+// TODO: eliminar esto cuando exista el backend de login.
+const TEMP_EMAIL = "admin@vacacubica.com";
+const TEMP_PASSWORD = "vaca123";
+
 const Login = () => {
   const navigate = useNavigate();
 
@@ -19,8 +24,13 @@ const Login = () => {
       setError("Ingresa tu correo y contraseña para continuar.");
       return;
     }
+
+    if (email.trim() !== TEMP_EMAIL || password !== TEMP_PASSWORD) {
+      setError("Correo o contraseña incorrectos.");
+      return;
+    }
+
     setError("");
-    // Aquí se conectará la autenticación real (JWT) más adelante.
     navigate("/");
   };
 
@@ -36,7 +46,6 @@ const Login = () => {
       >
         <div className="login-brand">
           <img src={VacaCubicaLogo} alt="Vaca Cúbica" />
-          <h1>Vaca Cúbica</h1>
           <p>Gestión Bovina</p>
         </div>
       </div>
