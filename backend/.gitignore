@@ -1,0 +1,14 @@
+node_modules/
+*.txt
+*.env
+.txt*
+.env*
+env/
+venv/
+vaca-cubica/env/
+vaca-cubica/backend/env/
+backend/venv/
+backend/env/
+backend/.env
+__pycache__/
+backend/*.txt
