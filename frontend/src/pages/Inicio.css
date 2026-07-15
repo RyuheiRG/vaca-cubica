@@ -240,3 +240,15 @@
   color: #aaa;
   margin-top: 0.15rem;
 }
+
+
+
+/* Gráficos temporales */
+
+.chart-image-wrapper img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--border-radius-md);
+  margin-top: 0.5rem;
+}

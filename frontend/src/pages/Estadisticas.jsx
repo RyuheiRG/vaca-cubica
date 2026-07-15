@@ -1,10 +1,16 @@
+import EjemploGrafica from "../assets/ejemplo-grafica.png";
+import "./Estadisticas.css";
+
 const Estadisticas = () => {
   return (
     <div>
       <h1>Estadísticas</h1>
       <p>Resumen de datos y métricas</p>
-      {/* Aquí maquetarán la pantalla de Estadísticas según el diseño de Figma */}
-      {/* Hagan lo mismo con las demás pantallas, como Login, Inicio, Bovinos, Bitácora, Catálogo y Ventas */}
+
+      {/* Imagen temporal mientras se maqueta esta pantalla según el diseño de Figma */}
+      <div className="estadisticas-card">
+        <img src={EjemploGrafica} alt="Ejemplo de gráfica (temporal)" />
+      </div>
     </div>
   );
 };

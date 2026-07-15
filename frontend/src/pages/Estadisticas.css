@@ -1,0 +1,14 @@
+.estadisticas-card {
+  background: #ffffff;
+  border-radius: var(--border-radius-md);
+  padding: 1.5rem;
+  margin-top: 1.5rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.estadisticas-card img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--border-radius-md);
+}

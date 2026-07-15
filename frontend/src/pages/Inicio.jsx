@@ -1,8 +1,10 @@
 import {AlertTriangle, Clock} from "lucide-react";
 import StatCard from "../components/StatCard";
-import ChartPlaceholder from "../components/ChartPlaceholder";
 import {useBovinos} from "../context/BovinosContext";
 import BovinoIcon from "../assets/bovino.png";
+import GraficaPeso from "../assets/ejemplo-grafica-peso.png";
+import GraficaHato from "../assets/ejemplo-grafica-hato.png";
+import GraficaRaza from "../assets/ejemplo-grafica-raza.png";
 import "./Inicio.css";
 
 const estadoVariant = {
@@ -69,24 +71,6 @@ const Inicio = () => {
     },
   ];
 
-  const estadoHato = [
-    {
-      label: "Saludable",
-      value: bovinos.filter((b) => b.estado === "Saludable").length,
-      color: "#0ea5e9",
-    },
-    {
-      label: "En Observación",
-      value: bovinos.filter((b) => b.estado === "En Observación").length,
-      color: "#b45309",
-    },
-    {
-      label: "Enfermo",
-      value: bovinos.filter((b) => b.estado === "Enfermo").length,
-      color: "#e11d48",
-    },
-  ];
-
   const alertas = bovinos
     .filter((b) => b.estado !== "Saludable")
     .map((b) => ({
@@ -141,38 +125,26 @@ const Inicio = () => {
       </div>
 
       <div className="inicio-charts-row">
-        <ChartPlaceholder
-          title="Evolución del peso del hato"
-          subtitle="Peso total acumulado en kg — 2026"
-          badge="+19.7% ↑"
-          height={240}
-        />
-        <div className="chart-card">
+        <div className="chart-card chart-image-wrapper">
+          <div className="chart-card-header">
+            <div>
+              <h3>Evolución del peso del hato</h3>
+              <p className="chart-subtitle">
+                Peso total acumulado en kg — 2026
+              </p>
+            </div>
+          </div>
+          <img src={GraficaPeso} alt="Evolución del peso del hato" />
+        </div>
+
+        <div className="chart-card chart-image-wrapper">
           <div className="chart-card-header">
             <div>
               <h3>Estado del hato</h3>
               <p className="chart-subtitle">Distribución actual</p>
             </div>
           </div>
-          <div className="chart-placeholder-box" style={{height: 140}}>
-            <span style={{fontSize: "0.85rem", fontWeight: 600, color: "#999"}}>
-              Gráfica en desarrollo
-            </span>
-          </div>
-          <div style={{marginTop: "1rem"}}>
-            {estadoHato.map((item) => (
-              <div key={item.label} className="finance-row">
-                <span className="finance-label">
-                  <span
-                    className="alert-status-dot"
-                    style={{backgroundColor: item.color}}
-                  />
-                  {item.label}
-                </span>
-                <span className="finance-value">{item.value}</span>
-              </div>
-            ))}
-          </div>
+          <img src={GraficaHato} alt="Estado del hato" />
         </div>
       </div>
 
@@ -221,12 +193,14 @@ const Inicio = () => {
           ))}
         </div>
 
-        <div className="info-card">
-          <ChartPlaceholder
-            title="Peso promedio por raza"
-            subtitle="Kilogramos"
-            height={160}
-          />
+        <div className="info-card chart-image-wrapper">
+          <div className="chart-card-header">
+            <div>
+              <h3>Peso promedio por raza</h3>
+              <p className="chart-subtitle">Kilogramos</p>
+            </div>
+          </div>
+          <img src={GraficaRaza} alt="Peso promedio por raza" />
 
           <div className="info-list-title">Resumen financiero — Jun</div>
           <div className="finance-row">
