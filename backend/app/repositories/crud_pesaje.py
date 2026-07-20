@@ -15,7 +15,6 @@ async def create_pesaje(
     Nota: El usuario_id se inyecta desde el controlador (Zero Trust).
     """
     pesaje_data = pesaje_in.model_dump()
-    # Inyectamos la firma del autor de la transacción
     db_pesaje = HistorialPesaje(**pesaje_data, usuario_id=usuario_id)
     
     db.add(db_pesaje)

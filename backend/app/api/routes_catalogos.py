@@ -13,12 +13,10 @@ from app.schemas.catalogo import (
 from app.repositories import crud_catalogos
 from app.api.deps import get_current_user
 
-# Usamos múltiples routers pequeños para exportarlos limpiamente al Main
 router_vacunas = APIRouter()
 router_alimentos = APIRouter()
 router_clientes = APIRouter()
 
-# --- ENDPOINTS VACUNAS ---
 @router_vacunas.post("/", response_model=VacunaResponse, status_code=status.HTTP_201_CREATED)
 async def registrar_vacuna(
     vacuna_in: VacunaCreate,
@@ -31,7 +29,7 @@ async def registrar_vacuna(
 async def eliminar_vacuna(
     vacuna_id: int,
     db: AsyncSession = Depends(get_db),
-    current_user: Usuario = Depends(get_current_user) # Solo usuarios autenticados
+    current_user: Usuario = Depends(get_current_user)
 ):
     """
     Elimina físicamente una vacuna del catálogo. 
@@ -44,9 +42,8 @@ async def eliminar_vacuna(
                 status_code=status.HTTP_404_NOT_FOUND, 
                 detail="La vacuna especificada no existe."
             )
-        return None # Un 204 No Content no devuelve body
+        return None
     except IntegrityError:
-        # El motor SQL lanza esto si la vacuna ya existe en la tabla registro_medico
         await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -76,7 +73,6 @@ async def listar_alimentos(
 ):
     return await crud_catalogos.get_alimentos(db, skip, limit)
 
-# --- ENDPOINTS CLIENTES ---
 @router_clientes.post("/", response_model=ClienteResponse, status_code=status.HTTP_201_CREATED)
 async def registrar_cliente(
     cliente_in: ClienteCreate,

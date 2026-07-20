@@ -35,18 +35,14 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Configuración estricta de CORS (Para permitir que React se conecte)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"], # Tu frontend
+    allow_origins=["http://localhost:5173", "http://52.207.147.127:8000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# ==========================================
-# REGISTRO DE RUTAS
-# ==========================================
 app.include_router(auth_router, prefix="/api/auth", tags=["Autenticación"])
 app.include_router(usuarios_router, prefix="/api/usuarios", tags=["Usuarios"])
 app.include_router(bovinos_router, prefix="/api/bovinos", tags=["Bovinos"])

@@ -56,14 +56,12 @@ async def registrar_renta(
     if not bovino:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Bovino no encontrado.")
 
-    # Escudo Pre-Trigger: Evita el Error 500 del motor SQL
     if not bovino.es_semental or bovino.sexo.value != "macho" or bovino.estado != EstadoBovino.activo:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Solo bovinos machos, activos y designados como sementales pueden registrarse en renta."
         )
 
-    # Validación de cronología (evita el CheckConstraint)
     if renta_in.fecha_fin and renta_in.fecha_fin < renta_in.fecha_inicio:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

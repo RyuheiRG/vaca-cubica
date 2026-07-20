@@ -18,7 +18,6 @@ async def registrar_parto(
     db: AsyncSession = Depends(get_db),
     current_user: Usuario = Depends(get_current_user)
 ):
-    # 1. Validación Biológica
     madre = await db.get(Bovino, parto_in.madre_id)
     if not madre:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="La vaca especificada no existe.")

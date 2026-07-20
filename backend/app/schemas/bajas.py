@@ -13,13 +13,11 @@ class BajaBovinoBase(BaseModel):
 class BajaBovinoCreate(BajaBovinoBase):
     model_config = ConfigDict(extra="forbid")
 
-    # Hitbox Dinámico: Verifica condiciones complejas en el JSON entrante
     @model_validator(mode='after')
     def validar_causa_fallecimiento(self):
         if self.tipo == TipoBaja.fallecido and not self.causa:
             raise ValueError("La causa de defunción es obligatoria cuando el tipo de baja es 'fallecido'.")
         
-        # Opcional: Limpiar causa si es una venta, para mantener la BD limpia
         if self.tipo == TipoBaja.vendido and self.causa:
             self.causa = None 
             

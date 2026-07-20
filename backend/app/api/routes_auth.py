@@ -18,11 +18,8 @@ async def login_access_token(
     Endpoint para autenticación de usuarios.
     Valida credenciales y devuelve un JWT (Zero Trust access).
     """
-    # 1. Buscamos al usuario en la base de datos
     user = await get_user_by_username(db, username=form_data.username)
     
-    # 2. Si no existe o la contraseña (en texto plano vs hash) no cuadra, rechazamos.
-    # Usamos el mismo mensaje para ambos casos para evitar "User Enumeration Attacks".
     if not user or not verify_password(form_data.password, user.password_hash):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -30,20 +27,17 @@ async def login_access_token(
             headers={"WWW-Authenticate": "Bearer"},
         )
         
-    # 3. Verificamos que la cuenta no esté suspendida
     if not user.activo:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="La cuenta ha sido desactivada"
         )
 
-    # 4. Construimos el payload criptográfico
     jwt_payload = {
         "sub": str(user.id),
         "rol": user.rol.value
     }
     
-    # 5. Generamos y firmamos el token
     access_token = create_access_token(data=jwt_payload)
     
     return {

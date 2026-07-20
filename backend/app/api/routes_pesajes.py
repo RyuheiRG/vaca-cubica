@@ -15,11 +15,10 @@ router = APIRouter()
 async def registrar_pesaje(
     pesaje_in: HistorialPesajeCreate,
     db: AsyncSession = Depends(get_db),
-    current_user: Usuario = Depends(get_current_user) # El JWT inyecta esta variable
+    current_user: Usuario = Depends(get_current_user)
 ):
     """Añade un registro al historial de peso de un bovino."""
     try:
-        # Pasamos el payload de Pydantic y el ID extraído de la bóveda del JWT
         nuevo_pesaje = await crud_pesaje.create_pesaje(
             db=db, 
             pesaje_in=pesaje_in, 
@@ -27,7 +26,6 @@ async def registrar_pesaje(
         )
         return nuevo_pesaje
     except IntegrityError:
-        # Hacemos rollback para limpiar la sesión de SQLAlchemy
         await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,

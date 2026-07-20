@@ -10,8 +10,6 @@ from app.schemas.auth import TokenPayload
 from app.models.domain_models import Usuario
 from app.repositories import crud_auditoria
 
-# Declaramos la ubicación de nuestro endpoint de Login.
-# Esto le permite a Swagger UI saber dónde pedir el token automáticamente.
 reusable_oauth2 = OAuth2PasswordBearer(
     tokenUrl="/api/auth/login"
 )
@@ -26,11 +24,9 @@ async def get_current_user(
     Si algo falla (token alterado, expirado, o usuario borrado), bloquea la petición (Perfect Guard).
     """
     try:
-        # 1. Desencriptamos el JWT usando nuestra llave secreta
         payload = jwt.decode(
             token, SECRET_KEY, algorithms=[ALGORITHM]
         )
-        # 2. Pasamos el payload por Pydantic para asegurar que tenga el 'sub' (User ID)
         token_data = TokenPayload(**payload)
         
     except (jwt.PyJWTError, ValidationError):
@@ -40,7 +36,6 @@ async def get_current_user(
             headers={"WWW-Authenticate": "Bearer"},
         )
     
-    # 3. Verificamos que el usuario que originó el token siga existiendo físicamente en MySQL
     user = await db.get(Usuario, int(token_data.sub))
     
     if not user:
@@ -49,7 +44,6 @@ async def get_current_user(
             detail="El usuario asociado a este token ya no existe."
         )
         
-    # 4. Verificamos que el Dueño no lo haya desactivado temporalmente
     if not user.activo:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, 

@@ -2,14 +2,12 @@ from pydantic import BaseModel, ConfigDict, Field
 from datetime import date, datetime
 from decimal import Decimal
 
-# --- HISTORIAL PESAJE ---
 class HistorialPesajeBase(BaseModel):
     bovino_id: int = Field(..., gt=0)
     fecha: date
     peso_kg: Decimal = Field(..., gt=0, decimal_places=2)
 
 class HistorialPesajeCreate(HistorialPesajeBase):
-    # Zero Trust: usuario_id se omite intencionalmente. Lo inyecta el token.
     model_config = ConfigDict(extra="forbid")
 
 class HistorialPesajeResponse(HistorialPesajeBase):
@@ -18,7 +16,6 @@ class HistorialPesajeResponse(HistorialPesajeBase):
     created_at: datetime
     model_config = ConfigDict(from_attributes=True)
 
-# --- REGISTRO MÉDICO ---
 class RegistroMedicoBase(BaseModel):
     bovino_id: int = Field(..., gt=0)
     vacuna_id: int = Field(..., gt=0)
@@ -34,7 +31,6 @@ class RegistroMedicoResponse(RegistroMedicoBase):
     created_at: datetime
     model_config = ConfigDict(from_attributes=True)
 
-# --- DIETA DIARIA ---
 class DietaDiariaBase(BaseModel):
     bovino_id: int = Field(..., gt=0)
     alimento_id: int = Field(..., gt=0)

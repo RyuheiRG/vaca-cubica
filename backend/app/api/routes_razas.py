@@ -17,7 +17,6 @@ async def registrar_raza(
     current_user: Usuario = Depends(get_current_user)
 ):
     """Registra una nueva raza en el catálogo del sistema."""
-    # Hitbox Check: Evita duplicados
     raza_existente = await crud_raza.get_raza_by_nombre(db, nombre=raza_in.nombre)
     if raza_existente:
         raise HTTPException(

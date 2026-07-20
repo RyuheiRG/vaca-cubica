@@ -7,11 +7,10 @@ from app.schemas.bajas import BajaBovinoCreate
 
 async def create_baja(db: AsyncSession, baja_in: BajaBovinoCreate, usuario_id: int) -> BajaBovino:
     """Ejecuta el registro de la baja y muta el estado del bovino atómicamente."""
-    # 1. Preparar la baja
+
     db_baja = BajaBovino(**baja_in.model_dump(), usuario_id=usuario_id)
     db.add(db_baja)
 
-    # 2. Mutar el estado del bovino
     bovino = await db.get(Bovino, baja_in.bovino_id)
     if bovino:
         if baja_in.tipo == TipoBaja.fallecido:
@@ -20,7 +19,6 @@ async def create_baja(db: AsyncSession, baja_in: BajaBovinoCreate, usuario_id: i
             bovino.estado = EstadoBovino.vendido
         db.add(bovino)
 
-    # 3. Commit transaccional
     await db.commit()
     await db.refresh(db_baja)
     return db_baja

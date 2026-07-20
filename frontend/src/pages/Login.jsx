@@ -1,13 +1,11 @@
-import {useState} from "react";
-import {useNavigate} from "react-router-dom";
-import {Mail, Lock} from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Mail, Lock } from "lucide-react";
 import Button from "../components/Button";
 import VacaCubicaLogo from "../assets/vaca-cubica-icon-sesion.png";
 import CowFieldImg from "../assets/vaca.png";
 import "./Login.css";
 
-// Credenciales temporales mientras se conecta la autenticación real (JWT).
-// TODO: eliminar esto cuando exista el backend de login.
 const TEMP_EMAIL = "admin@pedro.com";
 const TEMP_PASSWORD = "vaca_segura_123";
 
@@ -42,7 +40,7 @@ const Login = () => {
     <div className="login-page">
       <div
         className="login-image-side"
-        style={{backgroundImage: `url(${CowFieldImg})`}}
+        style={{ backgroundImage: `url(${CowFieldImg})` }}
       >
         <div className="login-brand">
           <img src={VacaCubicaLogo} alt="Vaca Cúbica" />

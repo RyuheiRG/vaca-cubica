@@ -10,9 +10,8 @@ class UsuarioBase(BaseModel):
 
 class UsuarioCreate(UsuarioBase):
     """Esquema usado cuando el Dueño registra a un nuevo Caporal"""
-    password: str = Field(..., min_length=8, description="Contraseña en texto plano a ser hasheada")
+    password: str = Field(..., min_length=8, max_length=72, description="Contraseña en texto plano a ser hasheada")
     
-    # ZERO TRUST: Rechaza cualquier key-value no definido explícitamente en esta clase.
     model_config = ConfigDict(extra="forbid")
 
 class UsuarioUpdate(BaseModel):
@@ -22,7 +21,6 @@ class UsuarioUpdate(BaseModel):
     rol: Optional[RolUsuario] = None
     activo: Optional[bool] = None
 
-    # ZERO TRUST: Rechaza campos basura
     model_config = ConfigDict(extra="forbid")
 
 class UsuarioResponse(UsuarioBase):
@@ -31,5 +29,4 @@ class UsuarioResponse(UsuarioBase):
     created_at: datetime
     updated_at: datetime
 
-    # ORM MODE (Pydantic V2): Permite a Pydantic leer directamente el objeto de SQLAlchemy
     model_config = ConfigDict(from_attributes=True)

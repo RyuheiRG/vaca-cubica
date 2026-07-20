@@ -1,7 +1,8 @@
 node_modules/
-*.txt
+backend/CONFIG.txt
+backend/DB.txt
+backend/notas.txt
 *.env
-.txt*
 .env*
 env/
 venv/

@@ -8,5 +8,5 @@ class Token(BaseModel):
 
 class TokenPayload(BaseModel):
     """Esquema de los datos desencriptados del JWT"""
-    sub: Optional[str] = None # Almacenará el ID del usuario
-    rol: Optional[str] = None # Almacenará el rol (dueño/caporal) para RBAC
+    sub: Optional[str] = None
+    rol: Optional[str] = None

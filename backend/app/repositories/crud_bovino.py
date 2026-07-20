@@ -27,7 +27,6 @@ async def get_bovinos(
     """
     stmt = select(Bovino).offset(skip).limit(limit)
     
-    # Inyectamos el filtro WHERE de forma dinámica si el frontend lo solicita
     if estado:
         stmt = stmt.where(Bovino.estado == estado)
         
@@ -38,7 +37,6 @@ async def create_bovino(db: AsyncSession, bovino_in: BovinoCreate) -> Bovino:
     """
     Desempaqueta el DTO de Pydantic y materializa la entidad en MySQL.
     """
-    # model_dump() convierte el objeto Pydantic en un diccionario estándar
     bovino_data = bovino_in.model_dump()
     db_bovino = Bovino(**bovino_data)
     
@@ -57,7 +55,6 @@ async def update_bovino(
     Aplica una actualización parcial (Patch).
     Solo modifica los campos que el cliente envió explícitamente.
     """
-    # exclude_unset=True evita sobreescribir con None los campos que no se enviaron
     update_data = bovino_in.model_dump(exclude_unset=True)
     
     for field, value in update_data.items():

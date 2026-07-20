@@ -1,10 +1,9 @@
 from datetime import datetime, timedelta, timezone
 from typing import Optional
-import jwt  # De PyJWT
+import jwt
 import bcrypt
 from app.core.config import settings
 
-# Constantes del JWT (Firma estricta)
 SECRET_KEY = settings.SECRET_KEY
 ALGORITHM = settings.ALGORITHM
 ACCESS_TOKEN_EXPIRE_MINUTES = settings.ACCESS_TOKEN_EXPIRE_MINUTES
@@ -19,7 +18,6 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
         hash_bytes = hashed_password.encode('utf-8')
         return bcrypt.checkpw(password_bytes, hash_bytes)
     except ValueError:
-        # Prevención contra hashes corruptos en la BD
         return False
 
 def get_password_hash(password: str) -> str:
@@ -31,7 +29,6 @@ def get_password_hash(password: str) -> str:
     salt = bcrypt.gensalt()
     hashed_bytes = bcrypt.hashpw(password_bytes, salt)
     
-    # Decodificamos a string para poder guardarlo en el VARCHAR(255) de MySQL
     return hashed_bytes.decode('utf-8')
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
@@ -45,6 +42,5 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
         
     to_encode.update({"exp": expire})
     
-    # PyJWT moderno devuelve directamente un string, no un objeto de bytes
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt

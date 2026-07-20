@@ -18,7 +18,6 @@ async def registrar_bovino(
     _ = Depends(audit_event)
 ):
     """Registra un nuevo bovino en el hato."""
-    # 1. Radar de colisiones (Evita el IntegrityError de MySQL)
     bovino_existente = await crud_bovino.get_bovino_by_arete(db, arete=bovino_in.arete)
     if bovino_existente:
         raise HTTPException(
@@ -26,11 +25,6 @@ async def registrar_bovino(
             detail=f"El arete físico '{bovino_in.arete}' ya está registrado en el sistema."
         )
     
-    # IMPORTANTE: No estamos validando raza_id aquí. 
-    # MySQL arrojará un error 500 (Foreign Key Constraint) si envías una raza_id que no existe.
-    # En la versión final, el frontend enviará IDs válidos consultando el endpoint de catálogos.
-    
-    # 2. Inserción
     nuevo_bovino = await crud_bovino.create_bovino(db, bovino_in)
     return nuevo_bovino
 

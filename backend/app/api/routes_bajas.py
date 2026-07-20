@@ -17,7 +17,6 @@ async def registrar_baja(
     db: AsyncSession = Depends(get_db),
     current_user: Usuario = Depends(get_current_user)
 ):
-    # 1. Validar pre-condiciones del Bovino
     bovino = await db.get(Bovino, baja_in.bovino_id)
     if not bovino:
         raise HTTPException(
@@ -32,7 +31,6 @@ async def registrar_baja(
         )
 
     try:
-        # 2. Ejecutar transacción
         nueva_baja = await crud_bajas.create_baja(db, baja_in, current_user.id)
         return nueva_baja
     except IntegrityError:

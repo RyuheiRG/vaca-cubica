@@ -4,9 +4,6 @@ from typing import Optional
 from decimal import Decimal
 from app.models.domain_models import SexoBovino, EstadoBovino
 
-# -----------------------------------------
-# ESQUEMA BASE
-# -----------------------------------------
 class BovinoBase(BaseModel):
     arete: str = Field(..., min_length=2, max_length=20, description="Código de identificación físico")
     nombre: Optional[str] = Field(None, max_length=100)
@@ -18,15 +15,9 @@ class BovinoBase(BaseModel):
     estado: EstadoBovino = EstadoBovino.activo
     es_semental: bool = False
 
-# -----------------------------------------
-# ESQUEMA DE ENTRADA (Creación)
-# -----------------------------------------
 class BovinoCreate(BovinoBase):
     model_config = ConfigDict(extra="forbid")
 
-# -----------------------------------------
-# ESQUEMA DE ENTRADA (Actualización Parcial)
-# -----------------------------------------
 class BovinoUpdate(BaseModel):
     nombre: Optional[str] = Field(None, max_length=100)
     estado: Optional[EstadoBovino] = None
@@ -34,9 +25,6 @@ class BovinoUpdate(BaseModel):
     
     model_config = ConfigDict(extra="forbid")
 
-# -----------------------------------------
-# ESQUEMA DE SALIDA
-# -----------------------------------------
 class BovinoResponse(BovinoBase):
     id: int
     
