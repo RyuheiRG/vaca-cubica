@@ -26,6 +26,12 @@ const DynamicForm = ({fields, values, onChange}) => {
               value={values[field.key] ?? ""}
               onChange={(e) => onChange(field.key, e.target.value)}
             />
+          ) : field.type === "checkbox" ? (
+            <input
+              type="checkbox"
+              checked={!!values[field.key]}
+              onChange={(e) => onChange(field.key, e.target.checked)}
+            />
           ) : (
             <input
               type={field.type || "text"}

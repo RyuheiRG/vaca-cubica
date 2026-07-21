@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import {useState, useMemo} from "react";
 import Button from "../components/Button";
 import DataTable from "../components/DataTable";
 import Modal from "../components/Modal";
@@ -8,10 +8,10 @@ import StatCard from "../components/StatCard";
 import FilterBar from "../components/FilterBar";
 import Pagination from "../components/Pagination";
 import DynamicForm from "../components/DynamicForm";
-import { useBovinos } from "../context/BovinosContext";
-import { useRazas } from "../context/RazasContext";
+import {useBovinos} from "../context/BovinosContext";
+import {useRazas} from "../context/RazasContext";
 import AsyncState from "../components/AsyncState";
-import { getFriendlyErrorMessage } from "../utils/errorMessage";
+import {getFriendlyErrorMessage} from "../utils/errorMessage";
 import BovinoIcon from "../assets/bovino.png";
 import "./Bovinos.css";
 
@@ -34,7 +34,7 @@ const calcularEdad = (fechaNacimiento) => {
 const animalRender = (row) => (
   <div className="bovino-cell">
     <span className="bovino-avatar">
-      <img src={BovinoIcon} alt="Bovino" style={{ width: 18, height: 18 }} />
+      <img src={BovinoIcon} alt="Bovino" style={{width: 18, height: 18}} />
     </span>
     <div>
       <div className="bovino-name">{row.nombre || "—"}</div>
@@ -44,12 +44,12 @@ const animalRender = (row) => (
 );
 
 const columns = [
-  { key: "nombre", label: "Animal", render: animalRender },
-  { key: "tipoRaza", label: "Raza" },
-  { key: "sexoLabel", label: "Sexo", badge: true },
-  { key: "edad", label: "Edad" },
-  { key: "pesoLabel", label: "Peso" },
-  { key: "estadoLabel", label: "Estado", badge: true },
+  {key: "nombre", label: "Animal", render: animalRender},
+  {key: "tipoRaza", label: "Raza"},
+  {key: "sexoLabel", label: "Sexo", badge: true},
+  {key: "edad", label: "Edad"},
+  {key: "pesoLabel", label: "Peso"},
+  {key: "estadoLabel", label: "Estado", badge: true},
 ];
 
 const emptyBovino = {
@@ -64,27 +64,27 @@ const emptyBovino = {
 };
 
 const Bovinos = () => {
-  const { bovinos, loading, error, refetch, createBovino, updateBovino } =
+  const {bovinos, loading, error, refetch, createBovino, updateBovino} =
     useBovinos();
-  const { razas, getRazaById } = useRazas();
+  const {razas, getRazaById} = useRazas();
 
   const formFields = [
-    { key: "nombre", label: "Nombre" },
-    { key: "arete", label: "Arete", placeholder: "B-006" },
+    {key: "nombre", label: "Nombre"},
+    {key: "arete", label: "Arete", placeholder: "B-006"},
     {
       key: "raza_id",
       label: "Raza",
       type: "select",
-      options: razas.map((r) => ({ value: r.id, label: r.nombre })),
+      options: razas.map((r) => ({value: r.id, label: r.nombre})),
     },
     {
       key: "sexo",
       label: "Sexo",
       type: "select",
-      options: SEXOS.map((s) => ({ value: s, label: capitalize(s) })),
+      options: SEXOS.map((s) => ({value: s, label: capitalize(s)})),
     },
-    { key: "fecha_nacimiento", label: "Fecha de nacimiento", type: "date" },
-    { key: "fecha_ingreso", label: "Fecha de ingreso", type: "date" },
+    {key: "fecha_nacimiento", label: "Fecha de nacimiento", type: "date"},
+    {key: "fecha_ingreso", label: "Fecha de ingreso", type: "date"},
     {
       key: "peso_ingreso",
       label: "Peso de ingreso (kg)",
@@ -95,7 +95,7 @@ const Bovinos = () => {
       key: "estado",
       label: "Estado",
       type: "select",
-      options: ESTADOS.map((e) => ({ value: e, label: capitalize(e) })),
+      options: ESTADOS.map((e) => ({value: e, label: capitalize(e)})),
     },
   ];
 
@@ -126,7 +126,7 @@ const Bovinos = () => {
   );
 
   const filters = [
-    { key: "sexoLabel", placeholder: "Sexo", options: SEXOS.map(capitalize) },
+    {key: "sexoLabel", placeholder: "Sexo", options: SEXOS.map(capitalize)},
     {
       key: "estadoLabel",
       placeholder: "Estado",
@@ -154,7 +154,7 @@ const Bovinos = () => {
   const pageData = filteredData.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const stats = [
-    { label: "Total Animales", value: displayData.length, variant: "neutral" },
+    {label: "Total Animales", value: displayData.length, variant: "neutral"},
     {
       label: "Activos",
       value: displayData.filter((b) => b.estado === "activo").length,
@@ -173,7 +173,7 @@ const Bovinos = () => {
   ];
 
   const handleFilterChange = (key, value) => {
-    setFilterValues((prev) => ({ ...prev, [key]: value }));
+    setFilterValues((prev) => ({...prev, [key]: value}));
     setPage(1);
   };
 
@@ -188,7 +188,7 @@ const Bovinos = () => {
   };
 
   const handleNewItemChange = (field, value) => {
-    setNewItem((prev) => ({ ...prev, [field]: value }));
+    setNewItem((prev) => ({...prev, [field]: value}));
   };
 
   const handleCreate = async () => {
@@ -201,7 +201,7 @@ const Bovinos = () => {
         fecha_nacimiento: newItem.fecha_nacimiento || null,
       });
       setShowCreateModal(false);
-      setToast({ message: "Bovino registrado correctamente", type: "success" });
+      setToast({message: "Bovino registrado correctamente", type: "success"});
     } catch (err) {
       setToast({
         message: err.response?.data?.detail || "No se pudo registrar el bovino",
@@ -215,7 +215,7 @@ const Bovinos = () => {
   const handleEdit = (row) => setEditingItem(row);
 
   const handleEditChange = (field, value) => {
-    setEditingItem((prev) => ({ ...prev, [field]: value }));
+    setEditingItem((prev) => ({...prev, [field]: value}));
   };
 
   // El backend solo permite editar nombre, estado y es_semental (BovinoUpdate).
@@ -248,7 +248,7 @@ const Bovinos = () => {
   const handleConfirmDelete = async () => {
     setSaving(true);
     try {
-      await updateBovino(itemToDelete.id, { estado: "fallecido" });
+      await updateBovino(itemToDelete.id, {estado: "fallecido"});
       setItemToDelete(null);
       setToast({
         message: "Bovino marcado como fallecido (no se puede eliminar vía API)",
@@ -364,7 +364,7 @@ const Bovinos = () => {
         {editingItem && (
           <DynamicForm
             fields={[
-              { key: "nombre", label: "Nombre" },
+              {key: "nombre", label: "Nombre"},
               {
                 key: "estado",
                 label: "Estado",
@@ -374,6 +374,15 @@ const Bovinos = () => {
                   label: capitalize(e),
                 })),
               },
+              ...(editingItem.sexo === "macho"
+                ? [
+                    {
+                      key: "es_semental",
+                      label: "Marcar como semental",
+                      type: "checkbox",
+                    },
+                  ]
+                : []),
             ]}
             values={editingItem}
             onChange={handleEditChange}

@@ -9,7 +9,7 @@ import api from "../services/api";
 
 const BovinosContext = createContext(null);
 
-export const BovinosProvider = ({ children }) => {
+export const BovinosProvider = ({children}) => {
   const [bovinos, setBovinos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -18,7 +18,7 @@ export const BovinosProvider = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
-      const { data } = await api.get("/api/bovinos/");
+      const {data} = await api.get("/api/bovinos/");
       setBovinos(data);
     } catch (err) {
       setError(err);
@@ -32,20 +32,25 @@ export const BovinosProvider = ({ children }) => {
   }, [fetchBovinos]);
 
   const createBovino = async (bovinoIn) => {
-    const { data } = await api.post("/api/bovinos/", bovinoIn);
+    const {data} = await api.post("/api/bovinos/", bovinoIn);
     setBovinos((prev) => [...prev, data]);
     return data;
   };
 
   const updateBovino = async (id, changes) => {
-    const { data } = await api.patch(`/api/bovinos/${id}`, changes);
+    const {data} = await api.patch(`/api/bovinos/${id}`, changes);
     setBovinos((prev) => prev.map((b) => (b.id === id ? data : b)));
     return data;
   };
 
   const getBovinoByCodigo = (arete) => {
     const found = bovinos.find((b) => b.arete === arete);
-    return found || { nombre: "—" };
+    return found || {nombre: "—"};
+  };
+
+  const getBovinoById = (id) => {
+    const found = bovinos.find((b) => b.id === id);
+    return found || {arete: "—", nombre: "—"};
   };
 
   return (
@@ -59,6 +64,7 @@ export const BovinosProvider = ({ children }) => {
         createBovino,
         updateBovino,
         getBovinoByCodigo,
+        getBovinoById,
       }}
     >
       {children}

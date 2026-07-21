@@ -1,21 +1,35 @@
-import { AlertTriangle, Clock } from "lucide-react";
+import {AlertTriangle, Clock} from "lucide-react";
+import {
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+} from "recharts";
+
 import StatCard from "../components/StatCard";
-import { useBovinos } from "../context/BovinosContext";
+import {useBovinos} from "../context/BovinosContext";
+import useEstadisticas, {CHART_COLORS} from "../hooks/useEstadisticas";
 import BovinoIcon from "../assets/bovino.png";
-import GraficaPeso from "../assets/ejemplo-grafica-peso.png";
-import GraficaHato from "../assets/ejemplo-grafica-hato.png";
-import GraficaRaza from "../assets/ejemplo-grafica-raza.png";
 import "./Inicio.css";
+import "../components/ChartPlaceholder.css"; // aporta la clase .chart-card usada abajo
 
 const estadoVariant = {
-  "En Observación": { variant: "warning", dotColor: "#b45309" },
-  Enfermo: { variant: "danger", dotColor: "#e11d48" },
+  cuarentena: {label: "Cuarentena", variant: "warning", dotColor: "#b45309"},
+  fallecido: {label: "Fallecido", variant: "danger", dotColor: "#e11d48"},
 };
 
 const proximasVacunasRaw = [
-  { id: 1, idBovino: "B-001", detalle: "Brucelosis", fecha: "28 jun" },
-  { id: 2, idBovino: "B-002", detalle: "Aftosa", fecha: "02 jul" },
-  { id: 3, idBovino: "B-005", detalle: "Rabia", fecha: "10 jul" },
+  {id: 1, idBovino: "B-001", detalle: "Brucelosis", fecha: "28 jun"},
+  {id: 2, idBovino: "B-002", detalle: "Aftosa", fecha: "02 jul"},
+  {id: 3, idBovino: "B-005", detalle: "Rabia", fecha: "10 jul"},
 ];
 
 const actividadRecienteRaw = [
@@ -49,37 +63,44 @@ const actividadRecienteRaw = [
   },
 ];
 
+const formatoMXN = (valor) =>
+  new Intl.NumberFormat("es-MX", {
+    style: "currency",
+    currency: "MXN",
+    maximumFractionDigits: 0,
+  }).format(valor);
+
 const Inicio = () => {
-  const { bovinos, getBovinoByCodigo } = useBovinos();
+  const {bovinos, getBovinoByCodigo} = useBovinos();
+  const {bovinosPorEstado, pesoPorRaza, evolucionPeso, kpis} =
+    useEstadisticas();
 
   const stats = [
-    { label: "Total Bovinos", value: bovinos.length, variant: "neutral" },
+    {label: "Total Bovinos", value: bovinos.length, variant: "neutral"},
     {
-      label: "Saludables",
-      value: bovinos.filter((b) => b.estado === "Saludable").length,
-      variant: "info",
+      label: "Activos",
+      value: bovinos.filter((b) => b.estado === "activo").length,
+      variant: "success",
     },
     {
-      label: "En Observación",
-      value: bovinos.filter((b) => b.estado === "En Observación").length,
+      label: "En Cuarentena",
+      value: bovinos.filter((b) => b.estado === "cuarentena").length,
       variant: "warning",
     },
     {
-      label: "Enfermos",
-      value: bovinos.filter((b) => b.estado === "Enfermo").length,
+      label: "Fallecidos",
+      value: bovinos.filter((b) => b.estado === "fallecido").length,
       variant: "danger",
     },
   ];
 
   const alertas = bovinos
-    .filter((b) => b.estado !== "Saludable")
+    .filter((b) => estadoVariant[b.estado])
     .map((b) => ({
       id: b.id,
-      nombre: b.nombre,
-      codigo: b.codigo,
-      raza: b.tipoRaza,
-      estado: b.estado,
-      ...(estadoVariant[b.estado] || { variant: "neutral", dotColor: "#999" }),
+      nombre: b.nombre || b.arete,
+      codigo: b.arete,
+      ...estadoVariant[b.estado],
     }));
 
   const proximasVacunas = proximasVacunasRaw.map((v) => ({
@@ -112,7 +133,7 @@ const Inicio = () => {
         </div>
       </div>
 
-      <div className="stats-grid" style={{ marginTop: "1.5rem" }}>
+      <div className="stats-grid" style={{marginTop: "1.5rem"}}>
         {stats.map((stat) => (
           <StatCard
             key={stat.label}
@@ -124,26 +145,66 @@ const Inicio = () => {
       </div>
 
       <div className="inicio-charts-row">
-        <div className="chart-card chart-image-wrapper">
+        <div className="chart-card">
           <div className="chart-card-header">
             <div>
               <h3>Evolución del peso del hato</h3>
               <p className="chart-subtitle">
-                Peso total acumulado en kg — 2026
+                Peso promedio registrado (kg), por mes
               </p>
             </div>
           </div>
-          <img src={GraficaPeso} alt="Evolución del peso del hato" />
+          {evolucionPeso.length === 0 ? (
+            <p className="chart-empty-inline">
+              Aún no hay pesajes registrados.
+            </p>
+          ) : (
+            <ResponsiveContainer width="100%" height={220}>
+              <LineChart data={evolucionPeso}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="mes" tick={{fontSize: 12}} />
+                <YAxis domain={["auto", "auto"]} />
+                <Tooltip />
+                <Line
+                  type="monotone"
+                  dataKey="valor"
+                  stroke={CHART_COLORS[0]}
+                  strokeWidth={2}
+                  dot={{r: 3}}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          )}
         </div>
 
-        <div className="chart-card chart-image-wrapper">
+        <div className="chart-card">
           <div className="chart-card-header">
             <div>
               <h3>Estado del hato</h3>
               <p className="chart-subtitle">Distribución actual</p>
             </div>
           </div>
-          <img src={GraficaHato} alt="Estado del hato" />
+          <ResponsiveContainer width="100%" height={220}>
+            <PieChart>
+              <Pie
+                data={bovinosPorEstado}
+                dataKey="cantidad"
+                nameKey="nombre"
+                cx="50%"
+                cy="50%"
+                outerRadius={75}
+                label={({cantidad}) => cantidad}
+              >
+                {bovinosPorEstado.map((entry, index) => (
+                  <Cell
+                    key={entry.nombre}
+                    fill={CHART_COLORS[index % CHART_COLORS.length]}
+                  />
+                ))}
+              </Pie>
+              <Tooltip />
+            </PieChart>
+          </ResponsiveContainer>
         </div>
       </div>
 
@@ -161,20 +222,18 @@ const Inicio = () => {
                 <img
                   src={BovinoIcon}
                   alt="Bovino"
-                  style={{ width: 16, height: 16 }}
+                  style={{width: 16, height: 16}}
                 />
               </span>
               <div>
                 <div className="alert-item-name">{a.nombre}</div>
-                <div className="alert-item-meta">
-                  {a.codigo} · {a.raza}
-                </div>
+                <div className="alert-item-meta">{a.codigo}</div>
                 <div className="alert-item-meta">
                   <span
                     className="alert-status-dot"
-                    style={{ backgroundColor: a.dotColor }}
+                    style={{backgroundColor: a.dotColor}}
                   />
-                  {a.estado}
+                  {a.label}
                 </div>
               </div>
             </div>
@@ -192,27 +251,37 @@ const Inicio = () => {
           ))}
         </div>
 
-        <div className="info-card chart-image-wrapper">
+        <div className="info-card">
           <div className="chart-card-header">
             <div>
               <h3>Peso promedio por raza</h3>
-              <p className="chart-subtitle">Kilogramos</p>
+              <p className="chart-subtitle">Kilogramos de ingreso</p>
             </div>
           </div>
-          <img src={GraficaRaza} alt="Peso promedio por raza" />
+          <ResponsiveContainer width="100%" height={180}>
+            <BarChart data={pesoPorRaza}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} />
+              <XAxis dataKey="raza" tick={{fontSize: 11}} />
+              <YAxis />
+              <Tooltip />
+              <Bar
+                dataKey="pesoIngresoPromedio"
+                fill={CHART_COLORS[0]}
+                radius={[4, 4, 0, 0]}
+              />
+            </BarChart>
+          </ResponsiveContainer>
 
-          <div className="info-list-title">Resumen financiero — Jun</div>
+          <div className="info-list-title">Resumen financiero</div>
           <div className="finance-row">
             <span className="finance-label">Ventas registradas</span>
-            <span className="finance-value positive">$0 MXN</span>
+            <span className="finance-value positive">
+              {formatoMXN(kpis?.ingresoTotalVentas ?? 0)}
+            </span>
           </div>
           <div className="finance-row">
-            <span className="finance-label">Rentas activas</span>
-            <span className="finance-value">0</span>
-          </div>
-          <div className="finance-row">
-            <span className="finance-label">Costo dieta aprox.</span>
-            <span className="finance-value warning">~$4,200 MXN</span>
+            <span className="finance-label">Total de ventas</span>
+            <span className="finance-value">{kpis?.totalVentas ?? 0}</span>
           </div>
         </div>
 
@@ -228,7 +297,7 @@ const Inicio = () => {
                 <img
                   src={BovinoIcon}
                   alt="Bovino"
-                  style={{ width: 16, height: 16 }}
+                  style={{width: 16, height: 16}}
                 />
               </span>
               <div>

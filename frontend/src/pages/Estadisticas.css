@@ -1,14 +1,31 @@
+.estadisticas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+  gap: 1.25rem;
+  margin-top: 1.5rem;
+}
+
 .estadisticas-card {
   background: #ffffff;
   border-radius: var(--border-radius-md);
   padding: 1.5rem;
-  margin-top: 1.5rem;
   box-shadow: var(--shadow-sm);
 }
 
-.estadisticas-card img {
-  display: block;
-  width: 100%;
-  height: auto;
-  border-radius: var(--border-radius-md);
+.estadisticas-card h3 {
+  font-size: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.estadisticas-card .chart-subtitle {
+  font-size: 0.85rem;
+  color: #777;
+  margin-bottom: 1rem;
+}
+
+.chart-empty {
+  color: #999;
+  font-size: 0.9rem;
+  padding: 2rem 0;
+  text-align: center;
 }

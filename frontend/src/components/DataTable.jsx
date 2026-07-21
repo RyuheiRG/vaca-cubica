@@ -3,6 +3,8 @@ import Badge from "./Badge";
 import "./DataTable.css";
 
 const DataTable = ({columns, data, onEdit, onDelete}) => {
+  const hasActions = Boolean(onEdit) || Boolean(onDelete);
+
   return (
     <div className="data-table-wrapper">
       <div className="data-table-scroll">
@@ -12,7 +14,7 @@ const DataTable = ({columns, data, onEdit, onDelete}) => {
               {columns.map((col) => (
                 <th key={col.key}>{col.label}</th>
               ))}
-              <th>Acciones</th>
+              {hasActions && <th>Acciones</th>}
             </tr>
           </thead>
           <tbody>
@@ -29,24 +31,30 @@ const DataTable = ({columns, data, onEdit, onDelete}) => {
                     )}
                   </td>
                 ))}
-                <td>
-                  <div className="table-actions">
-                    <button
-                      className="action-btn edit-btn"
-                      onClick={() => onEdit?.(row)}
-                      aria-label="Editar"
-                    >
-                      <Pencil size={16} color="#ffffff" />
-                    </button>
-                    <button
-                      className="action-btn delete-btn"
-                      onClick={() => onDelete?.(row)}
-                      aria-label="Eliminar"
-                    >
-                      <Trash2 size={16} color="#ffffff" />
-                    </button>
-                  </div>
-                </td>
+                {hasActions && (
+                  <td>
+                    <div className="table-actions">
+                      {onEdit && (
+                        <button
+                          className="action-btn edit-btn"
+                          onClick={() => onEdit(row)}
+                          aria-label="Editar"
+                        >
+                          <Pencil size={16} color="#ffffff" />
+                        </button>
+                      )}
+                      {onDelete && (
+                        <button
+                          className="action-btn delete-btn"
+                          onClick={() => onDelete(row)}
+                          aria-label="Eliminar"
+                        >
+                          <Trash2 size={16} color="#ffffff" />
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>
