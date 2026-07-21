@@ -1,70 +1,66 @@
-import {createContext, useContext, useState} from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from "react";
+import api from "../services/api";
 
 const BovinosContext = createContext(null);
 
-const initialBovinos = [
-  {
-    id: 1,
-    codigo: "B-001",
-    nombre: "Esperanza",
-    tipoRaza: "Holstein",
-    sexo: "Hembra",
-    edad: "3 años",
-    peso: "450 kg",
-    estado: "Saludable",
-  },
-  {
-    id: 2,
-    codigo: "B-002",
-    nombre: "Tornado",
-    tipoRaza: "Brahman",
-    sexo: "Macho",
-    edad: "5 años",
-    peso: "620 kg",
-    estado: "Saludable",
-  },
-  {
-    id: 3,
-    codigo: "B-003",
-    nombre: "Luna",
-    tipoRaza: "Simmental",
-    sexo: "Hembra",
-    edad: "2 años",
-    peso: "380 kg",
-    estado: "En Observación",
-  },
-  {
-    id: 4,
-    codigo: "B-004",
-    nombre: "Dulce",
-    tipoRaza: "Angus",
-    sexo: "Hembra",
-    edad: "4 años",
-    peso: "480 kg",
-    estado: "Enfermo",
-  },
-  {
-    id: 5,
-    codigo: "B-005",
-    nombre: "Fuerte",
-    tipoRaza: "Brahman",
-    sexo: "Macho",
-    edad: "6 años",
-    peso: "680 kg",
-    estado: "Saludable",
-  },
-];
+export const BovinosProvider = ({ children }) => {
+  const [bovinos, setBovinos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-export const BovinosProvider = ({children}) => {
-  const [bovinos, setBovinos] = useState(initialBovinos);
+  const fetchBovinos = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { data } = await api.get("/api/bovinos/");
+      setBovinos(data);
+    } catch (err) {
+      setError(err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-  const getBovinoByCodigo = (codigo) => {
-    const found = bovinos.find((b) => b.codigo === codigo);
-    return found || {nombre: "—", tipoRaza: "—"};
+  useEffect(() => {
+    fetchBovinos();
+  }, [fetchBovinos]);
+
+  const createBovino = async (bovinoIn) => {
+    const { data } = await api.post("/api/bovinos/", bovinoIn);
+    setBovinos((prev) => [...prev, data]);
+    return data;
+  };
+
+  const updateBovino = async (id, changes) => {
+    const { data } = await api.patch(`/api/bovinos/${id}`, changes);
+    setBovinos((prev) => prev.map((b) => (b.id === id ? data : b)));
+    return data;
+  };
+
+  const getBovinoByCodigo = (arete) => {
+    const found = bovinos.find((b) => b.arete === arete);
+    return found || { nombre: "—" };
   };
 
   return (
-    <BovinosContext.Provider value={{bovinos, setBovinos, getBovinoByCodigo}}>
+    <BovinosContext.Provider
+      value={{
+        bovinos,
+        setBovinos,
+        loading,
+        error,
+        refetch: fetchBovinos,
+        createBovino,
+        updateBovino,
+        getBovinoByCodigo,
+      }}
+    >
       {children}
     </BovinosContext.Provider>
   );

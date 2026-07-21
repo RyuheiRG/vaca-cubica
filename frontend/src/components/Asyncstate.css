@@ -1,0 +1,36 @@
+.async-state {
+  padding: 48px 24px;
+  text-align: center;
+  border-radius: 12px;
+  font-size: 0.95rem;
+}
+
+.async-state-loading {
+  opacity: 0.7;
+}
+
+.async-state-error {
+  color: #b3261e;
+  background: #fdecea;
+}
+
+.async-state-empty {
+  opacity: 0.7;
+  background: #f5f5f5;
+  border-radius: 12px;
+}
+
+.async-state-retry {
+  margin-top: 12px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  background: #2f6d3c;
+  color: white;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.async-state-retry:hover {
+  opacity: 0.9;
+}

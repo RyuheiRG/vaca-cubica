@@ -1,6 +1,6 @@
-import {AlertTriangle, Clock} from "lucide-react";
+import { AlertTriangle, Clock } from "lucide-react";
 import StatCard from "../components/StatCard";
-import {useBovinos} from "../context/BovinosContext";
+import { useBovinos } from "../context/BovinosContext";
 import BovinoIcon from "../assets/bovino.png";
 import GraficaPeso from "../assets/ejemplo-grafica-peso.png";
 import GraficaHato from "../assets/ejemplo-grafica-hato.png";
@@ -8,14 +8,14 @@ import GraficaRaza from "../assets/ejemplo-grafica-raza.png";
 import "./Inicio.css";
 
 const estadoVariant = {
-  "En Observación": {variant: "warning", dotColor: "#b45309"},
-  Enfermo: {variant: "danger", dotColor: "#e11d48"},
+  "En Observación": { variant: "warning", dotColor: "#b45309" },
+  Enfermo: { variant: "danger", dotColor: "#e11d48" },
 };
 
 const proximasVacunasRaw = [
-  {id: 1, idBovino: "B-001", detalle: "Brucelosis", fecha: "28 jun"},
-  {id: 2, idBovino: "B-002", detalle: "Aftosa", fecha: "02 jul"},
-  {id: 3, idBovino: "B-005", detalle: "Rabia", fecha: "10 jul"},
+  { id: 1, idBovino: "B-001", detalle: "Brucelosis", fecha: "28 jun" },
+  { id: 2, idBovino: "B-002", detalle: "Aftosa", fecha: "02 jul" },
+  { id: 3, idBovino: "B-005", detalle: "Rabia", fecha: "10 jul" },
 ];
 
 const actividadRecienteRaw = [
@@ -50,10 +50,10 @@ const actividadRecienteRaw = [
 ];
 
 const Inicio = () => {
-  const {bovinos, getBovinoByCodigo} = useBovinos();
+  const { bovinos, getBovinoByCodigo } = useBovinos();
 
   const stats = [
-    {label: "Total Bovinos", value: bovinos.length, variant: "neutral"},
+    { label: "Total Bovinos", value: bovinos.length, variant: "neutral" },
     {
       label: "Saludables",
       value: bovinos.filter((b) => b.estado === "Saludable").length,
@@ -79,7 +79,7 @@ const Inicio = () => {
       codigo: b.codigo,
       raza: b.tipoRaza,
       estado: b.estado,
-      ...(estadoVariant[b.estado] || {variant: "neutral", dotColor: "#999"}),
+      ...(estadoVariant[b.estado] || { variant: "neutral", dotColor: "#999" }),
     }));
 
   const proximasVacunas = proximasVacunasRaw.map((v) => ({
@@ -109,11 +109,10 @@ const Inicio = () => {
         <p>Aquí está el resumen de tu rancho al día de hoy.</p>
         <div className="inicio-banner-tags">
           <span className="inicio-tag">👑 Dueño</span>
-          <span className="inicio-tag">Rancho "El 4 P"</span>
         </div>
       </div>
 
-      <div className="stats-grid" style={{marginTop: "1.5rem"}}>
+      <div className="stats-grid" style={{ marginTop: "1.5rem" }}>
         {stats.map((stat) => (
           <StatCard
             key={stat.label}
@@ -162,7 +161,7 @@ const Inicio = () => {
                 <img
                   src={BovinoIcon}
                   alt="Bovino"
-                  style={{width: 16, height: 16}}
+                  style={{ width: 16, height: 16 }}
                 />
               </span>
               <div>
@@ -173,7 +172,7 @@ const Inicio = () => {
                 <div className="alert-item-meta">
                   <span
                     className="alert-status-dot"
-                    style={{backgroundColor: a.dotColor}}
+                    style={{ backgroundColor: a.dotColor }}
                   />
                   {a.estado}
                 </div>
@@ -229,7 +228,7 @@ const Inicio = () => {
                 <img
                   src={BovinoIcon}
                   alt="Bovino"
-                  style={{width: 16, height: 16}}
+                  style={{ width: 16, height: 16 }}
                 />
               </span>
               <div>

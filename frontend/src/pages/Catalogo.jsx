@@ -1,4 +1,4 @@
-import {useState, useMemo} from "react";
+import { useState, useMemo } from "react";
 import Button from "../components/Button";
 import DataTable from "../components/DataTable";
 import Modal from "../components/Modal";
@@ -7,257 +7,193 @@ import Toast from "../components/Toast";
 import Tabs from "../components/Tabs";
 import DynamicForm from "../components/DynamicForm";
 import FilterBar from "../components/FilterBar";
-import {useRazas} from "../context/RazasContext";
-import {useBovinos} from "../context/BovinosContext";
-import {useCrias} from "../context/CriasContext";
-import {useAlimentos} from "../context/AlimentosContext";
+import { useRazas } from "../context/RazasContext";
+import { useBovinos } from "../context/BovinosContext";
+import { useCrias } from "../context/CriasContext";
+import { useAlimentos } from "../context/AlimentosContext";
+import { useVacunas } from "../context/VacunasContext";
 import "./Catalogo.css";
 
+const capitalize = (str) =>
+  str ? str.charAt(0).toUpperCase() + str.slice(1) : str;
+const ESTADOS_SALUD = [
+  "excelente",
+  "bueno",
+  "observacion",
+  "critico",
+  "fallecido",
+];
+const SEXOS = ["macho", "hembra"];
+
 const Catalogo = () => {
-  const {razas, setRazas} = useRazas();
-  const {bovinos, getBovinoByCodigo} = useBovinos();
-  const {crias, setCrias} = useCrias();
-  const {alimentos, setAlimentos} = useAlimentos();
-  const nombresRazas = razas.map((r) => r.nombre);
+  const { razas, createRaza, getRazaById } = useRazas();
+  const { bovinos } = useBovinos();
+  const { crias, partos, createCria, createParto, updateCria } = useCrias();
+  const { alimentos, createAlimento } = useAlimentos();
+  const { vacunas, createVacuna, deleteVacuna } = useVacunas();
+
   const bovinoOptions = bovinos.map((b) => ({
-    value: b.codigo,
-    label: `${b.codigo} — ${b.nombre}`,
+    value: b.id,
+    label: `${b.arete} — ${b.nombre || "sin nombre"}`,
   }));
+  const razaOptions = razas.map((r) => ({ value: r.id, label: r.nombre }));
+
+  const criasDisplay = useMemo(
+    () =>
+      crias.map((c) => {
+        const madre = bovinos.find((b) => b.id === c.parto?.madre_id);
+        return {
+          ...c,
+          codigo: c.arete_provisional || `CRI-${c.id}`,
+          sexoLabel: capitalize(c.sexo),
+          razaNombre: getRazaById(c.raza_id).nombre,
+          madreLabel: madre ? madre.arete : "—",
+          fechaNacimiento: c.parto?.fecha_parto || "—",
+          pesoLabel: `${c.peso_nacer} kg`,
+          estadoLabel: capitalize(c.estado_salud),
+        };
+      }),
+    [crias, bovinos], // eslint-disable-line react-hooks/exhaustive-deps
+  );
+
+  const sementalesDisplay = useMemo(
+    () =>
+      bovinos
+        .filter((b) => b.es_semental)
+        .map((b) => ({
+          ...b,
+          codigo: b.arete,
+          razaNombre: getRazaById(b.raza_id).nombre,
+          estadoLabel: capitalize(b.estado),
+        })),
+    [bovinos], // eslint-disable-line react-hooks/exhaustive-deps
+  );
 
   const tabsConfig = [
     {
       key: "razas",
       label: "Razas",
       singular: "Raza",
-      prefix: "RZ",
       columns: [
-        {key: "codigo", label: "ID"},
-        {key: "nombre", label: "Nombre"},
-        {key: "origen", label: "Origen"},
-        {key: "tipo", label: "Tipo", badge: true},
-        {key: "peso", label: "Peso Prom."},
-        {key: "resistencia", label: "Resistencia", badge: true},
-        {key: "descripcion", label: "Descripción"},
-        {key: "estado", label: "Estado", badge: true},
+        { key: "nombre", label: "Nombre" },
+        { key: "peso_promedio_adulto", label: "Peso Prom. Adulto (kg)" },
       ],
       formFields: [
-        {key: "nombre", label: "Nombre"},
-        {key: "origen", label: "Origen"},
+        { key: "nombre", label: "Nombre" },
         {
-          key: "tipo",
-          label: "Tipo",
-          type: "select",
-          options: ["Cárnica", "Lechera", "Doble Propósito"],
-        },
-        {key: "peso", label: "Peso Promedio", placeholder: "550 kg"},
-        {
-          key: "resistencia",
-          label: "Resistencia",
-          type: "select",
-          options: ["Alta", "Media", "Baja"],
-        },
-        {key: "descripcion", label: "Descripción", type: "textarea"},
-        {
-          key: "estado",
-          label: "Estado",
-          type: "select",
-          options: ["Activa", "Inactiva"],
+          key: "peso_promedio_adulto",
+          label: "Peso Promedio Adulto (kg)",
+          type: "number",
         },
       ],
-      filters: [
-        {
-          key: "tipo",
-          placeholder: "Tipo",
-          options: ["Cárnica", "Lechera", "Doble Propósito"],
-        },
-      ],
-      moreFilters: [
-        {
-          key: "resistencia",
-          placeholder: "Resistencia",
-          options: ["Alta", "Media", "Baja"],
-        },
-        {key: "estado", placeholder: "Estado", options: ["Activa", "Inactiva"]},
-      ],
+      canCreate: true,
+      canEdit: false,
+      canDelete: false,
     },
     {
       key: "vacunas",
       label: "Vacunas",
       singular: "Vacuna",
-      prefix: "VAC",
       columns: [
-        {key: "codigo", label: "ID"},
-        {key: "nombre", label: "Nombre"},
-        {key: "laboratorio", label: "Laboratorio"},
-        {key: "dosis", label: "Dosis"},
-        {key: "frecuencia", label: "Frecuencia"},
-        {key: "estado", label: "Estado", badge: true},
+        { key: "nombre", label: "Nombre" },
+        { key: "enfermedad_objetivo", label: "Enfermedad Objetivo" },
       ],
       formFields: [
-        {key: "nombre", label: "Nombre"},
-        {key: "laboratorio", label: "Laboratorio"},
-        {key: "dosis", label: "Dosis", placeholder: "2 ml IM"},
-        {key: "frecuencia", label: "Frecuencia", placeholder: "Anual"},
-        {
-          key: "estado",
-          label: "Estado",
-          type: "select",
-          options: ["Activa", "Inactiva"],
-        },
+        { key: "nombre", label: "Nombre" },
+        { key: "enfermedad_objetivo", label: "Enfermedad Objetivo" },
       ],
-      initialData: [
-        {
-          id: 1,
-          codigo: "VAC-001",
-          nombre: "Vacuna A",
-          laboratorio: "Lab A",
-          dosis: "2 ml IM",
-          frecuencia: "Anual",
-          estado: "Activa",
-        },
-      ],
-      filters: [
-        {key: "estado", placeholder: "Estado", options: ["Activa", "Inactiva"]},
-      ],
-      moreFilters: [],
+      canCreate: true,
+      canEdit: false,
+      canDelete: true,
     },
     {
       key: "alimentos",
       label: "Alimentos",
       singular: "Alimento",
-      prefix: "ALI",
       columns: [
-        {key: "codigo", label: "ID"},
-        {key: "nombre", label: "Nombre"},
-        {key: "tipo", label: "Tipo"},
-        {key: "proveedor", label: "Proveedor"},
-        {key: "costoUnitario", label: "Costo Unitario"},
-        {key: "estado", label: "Estado", badge: true},
+        { key: "nombre", label: "Nombre" },
+        { key: "tipo", label: "Tipo" },
       ],
       formFields: [
-        {key: "nombre", label: "Nombre"},
-        {key: "tipo", label: "Tipo", placeholder: "Forraje, concentrado..."},
-        {key: "proveedor", label: "Proveedor"},
-        {key: "costoUnitario", label: "Costo Unitario", placeholder: "$120.00"},
-        {
-          key: "estado",
-          label: "Estado",
-          type: "select",
-          options: ["Activa", "Inactiva"],
-        },
+        { key: "nombre", label: "Nombre" },
+        { key: "tipo", label: "Tipo", placeholder: "Forraje, concentrado..." },
       ],
-      filters: [
-        {key: "estado", placeholder: "Estado", options: ["Activa", "Inactiva"]},
-      ],
-      moreFilters: [],
+      canCreate: true,
+      canEdit: false,
+      canDelete: false,
     },
     {
       key: "crias",
       label: "Crías",
       singular: "Cría",
-      prefix: "CRI",
       columns: [
-        {key: "codigo", label: "ID"},
-        {key: "nombre", label: "Nombre"},
-        {key: "sexo", label: "Sexo", badge: true},
-        {
-          key: "raza",
-          label: "Raza",
-          render: (row) => getBovinoByCodigo(row.madre).tipoRaza,
-        },
-        {key: "madre", label: "Madre"},
-        {key: "fechaNacimiento", label: "F. Nacimiento"},
-        {key: "pesoActual", label: "Peso Actual"},
-        {key: "estado", label: "Estado", badge: true},
+        { key: "codigo", label: "ID" },
+        { key: "sexoLabel", label: "Sexo", badge: true },
+        { key: "razaNombre", label: "Raza" },
+        { key: "madreLabel", label: "Madre" },
+        { key: "fechaNacimiento", label: "F. Nacimiento" },
+        { key: "pesoLabel", label: "Peso al Nacer" },
+        { key: "estadoLabel", label: "Estado de Salud", badge: true },
       ],
       formFields: [
-        {key: "nombre", label: "Nombre"},
+        {
+          key: "madre_id",
+          label: "Madre (Bovino)",
+          type: "select",
+          options: bovinoOptions,
+        },
+        { key: "fecha_parto", label: "Fecha de Parto", type: "date" },
+        {
+          key: "raza_id",
+          label: "Raza de la cría",
+          type: "select",
+          options: razaOptions,
+        },
         {
           key: "sexo",
           label: "Sexo",
           type: "select",
-          options: ["Macho", "Hembra"],
+          options: SEXOS.map((s) => ({ value: s, label: capitalize(s) })),
         },
+        { key: "peso_nacer", label: "Peso al Nacer (kg)", type: "number" },
         {
-          key: "madre",
-          label: "Madre (ID Bovino)",
+          key: "arete_provisional",
+          label: "Arete Provisional",
+          placeholder: "Opcional",
+        },
+      ],
+      editFormFields: [
+        {
+          key: "estado_salud",
+          label: "Estado de Salud",
           type: "select",
-          options: bovinoOptions,
-        },
-        {key: "fechaNacimiento", label: "Fecha de Nacimiento", type: "date"},
-        {key: "pesoActual", label: "Peso Actual", placeholder: "112 kg"},
-        {
-          key: "estado",
-          label: "Estado",
-          type: "select",
-          options: ["Lactante", "Destete", "Desarrollo"],
+          options: ESTADOS_SALUD.map((e) => ({
+            value: e,
+            label: capitalize(e),
+          })),
         },
       ],
-      filters: [
-        {key: "sexo", placeholder: "Sexo", options: ["Macho", "Hembra"]},
-      ],
-      moreFilters: [
-        {
-          key: "estado",
-          placeholder: "Estado",
-          options: ["Lactante", "Destete", "Desarrollo"],
-        },
-      ],
+      canCreate: true,
+      canEdit: true,
+      canDelete: false,
     },
     {
       key: "sementales",
       label: "Sementales",
       singular: "Semental",
-      prefix: "SEM",
       columns: [
-        {key: "codigo", label: "ID"},
-        {key: "nombre", label: "Nombre"},
-        {key: "raza", label: "Raza"},
-        {key: "edad", label: "Edad"},
-        {key: "estado", label: "Estado", badge: true},
+        { key: "codigo", label: "Arete" },
+        { key: "nombre", label: "Nombre" },
+        { key: "razaNombre", label: "Raza" },
+        { key: "estadoLabel", label: "Estado", badge: true },
       ],
-      formFields: [
-        {key: "nombre", label: "Nombre"},
-        {key: "raza", label: "Raza", type: "select", options: nombresRazas},
-        {key: "edad", label: "Edad", placeholder: "4 años"},
-        {
-          key: "estado",
-          label: "Estado",
-          type: "select",
-          options: ["Activa", "Inactiva"],
-        },
-      ],
-      initialData: [
-        {
-          id: 1,
-          codigo: "SEM-001",
-          nombre: "Toro Alfa",
-          raza: "Angus",
-          edad: "4 años",
-          estado: "Activa",
-        },
-      ],
-      filters: [
-        {key: "estado", placeholder: "Estado", options: ["Activa", "Inactiva"]},
-      ],
-      moreFilters: [],
+      canCreate: false,
+      canEdit: false,
+      canDelete: false,
     },
   ];
 
   const [activeTab, setActiveTab] = useState("razas");
-
-  // Estado local SOLO para pestañas que no viven en un Context compartido.
-  const [dataByTab, setDataByTab] = useState(() =>
-    Object.fromEntries(
-      tabsConfig
-        .filter(
-          (t) =>
-            t.key !== "razas" && t.key !== "crias" && t.key !== "alimentos",
-        )
-        .map((t) => [t.key, t.initialData]),
-    ),
-  );
-
   const [search, setSearch] = useState("");
   const [filterValues, setFilterValues] = useState({});
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -265,27 +201,26 @@ const Catalogo = () => {
   const [editingItem, setEditingItem] = useState(null);
   const [itemToDelete, setItemToDelete] = useState(null);
   const [toast, setToast] = useState(null);
+  const [saving, setSaving] = useState(false);
 
   const currentConfig = tabsConfig.find((t) => t.key === activeTab);
-  const isRazasTab = activeTab === "razas";
-  const isCriasTab = activeTab === "crias";
-  const isAlimentosTab = activeTab === "alimentos";
 
-  const currentData = isRazasTab
-    ? razas
-    : isCriasTab
-      ? crias
-      : isAlimentosTab
-        ? alimentos
-        : dataByTab[activeTab];
+  const currentData = {
+    razas,
+    vacunas,
+    alimentos,
+    crias: criasDisplay,
+    sementales: sementalesDisplay,
+  }[activeTab];
 
   const filteredData = useMemo(() => {
     let result = currentData;
     if (search.trim()) {
       const term = search.toLowerCase();
       result = result.filter((row) =>
-        Object.values(row).some((val) =>
-          String(val).toLowerCase().includes(term),
+        Object.values(row).some(
+          (val) =>
+            typeof val !== "object" && String(val).toLowerCase().includes(term),
         ),
       );
     }
@@ -298,14 +233,13 @@ const Catalogo = () => {
   const tabsWithCounts = tabsConfig.map((t) => ({
     key: t.key,
     label: t.label,
-    count:
-      t.key === "razas"
-        ? razas.length
-        : t.key === "crias"
-          ? crias.length
-          : t.key === "alimentos"
-            ? alimentos.length
-            : dataByTab[t.key].length,
+    count: {
+      razas,
+      vacunas,
+      alimentos,
+      crias: criasDisplay,
+      sementales: sementalesDisplay,
+    }[t.key].length,
   }));
 
   const handleTabChange = (key) => {
@@ -315,104 +249,114 @@ const Catalogo = () => {
   };
 
   const handleFilterChange = (key, value) => {
-    setFilterValues((prev) => ({...prev, [key]: value}));
+    setFilterValues((prev) => ({ ...prev, [key]: value }));
   };
 
   const handleOpenCreate = () => {
-    setNewItem({});
+    setNewItem(activeTab === "crias" ? { estado_salud: "excelente" } : {});
     setShowCreateModal(true);
   };
 
   const handleNewItemChange = (field, value) => {
-    setNewItem((prev) => ({...prev, [field]: value}));
+    setNewItem((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleCreate = () => {
-    const list = isRazasTab
-      ? razas
-      : isCriasTab
-        ? crias
-        : isAlimentosTab
-          ? alimentos
-          : dataByTab[activeTab];
-    const nextId = list.length ? Math.max(...list.map((r) => r.id)) + 1 : 1;
-    const codigo = `${currentConfig.prefix}-${String(nextId).padStart(3, "0")}`;
-    const newRecord = {id: nextId, codigo, ...newItem};
-
-    if (isRazasTab) {
-      setRazas((prev) => [...prev, newRecord]);
-    } else if (isCriasTab) {
-      setCrias((prev) => [...prev, newRecord]);
-    } else if (isAlimentosTab) {
-      setAlimentos((prev) => [...prev, newRecord]);
-    } else {
-      setDataByTab((prev) => ({
-        ...prev,
-        [activeTab]: [...prev[activeTab], newRecord],
-      }));
+  const handleCreate = async () => {
+    setSaving(true);
+    try {
+      if (activeTab === "razas") {
+        await createRaza({
+          nombre: newItem.nombre,
+          peso_promedio_adulto: Number(newItem.peso_promedio_adulto),
+        });
+      } else if (activeTab === "vacunas") {
+        await createVacuna({
+          nombre: newItem.nombre,
+          enfermedad_objetivo: newItem.enfermedad_objetivo,
+        });
+      } else if (activeTab === "alimentos") {
+        await createAlimento({ nombre: newItem.nombre, tipo: newItem.tipo });
+      } else if (activeTab === "crias") {
+        const parto = await createParto({
+          madre_id: Number(newItem.madre_id),
+          fecha_parto: newItem.fecha_parto,
+        });
+        await createCria({
+          parto_id: parto.id,
+          raza_id: Number(newItem.raza_id),
+          sexo: newItem.sexo,
+          peso_nacer: Number(newItem.peso_nacer),
+          arete_provisional: newItem.arete_provisional || null,
+        });
+      }
+      setShowCreateModal(false);
+      setToast({
+        message: `${currentConfig.singular} registrado correctamente`,
+        type: "success",
+      });
+    } catch (err) {
+      setToast({
+        message: err.response?.data?.detail || "No se pudo guardar el registro",
+        type: "error",
+      });
+    } finally {
+      setSaving(false);
     }
-
-    setShowCreateModal(false);
-    setToast({
-      message: `${currentConfig.singular} registrado correctamente`,
-      type: "success",
-    });
   };
 
   const handleEdit = (row) => setEditingItem(row);
 
   const handleEditChange = (field, value) => {
-    setEditingItem((prev) => ({...prev, [field]: value}));
+    setEditingItem((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSaveEdit = () => {
-    if (isRazasTab) {
-      setRazas((prev) =>
-        prev.map((r) => (r.id === editingItem.id ? editingItem : r)),
-      );
-    } else if (isCriasTab) {
-      setCrias((prev) =>
-        prev.map((r) => (r.id === editingItem.id ? editingItem : r)),
-      );
-    } else if (isAlimentosTab) {
-      setAlimentos((prev) =>
-        prev.map((r) => (r.id === editingItem.id ? editingItem : r)),
-      );
-    } else {
-      setDataByTab((prev) => ({
-        ...prev,
-        [activeTab]: prev[activeTab].map((r) =>
-          r.id === editingItem.id ? editingItem : r,
-        ),
-      }));
+  const handleSaveEdit = async () => {
+    setSaving(true);
+    try {
+      if (activeTab === "crias") {
+        await updateCria(editingItem.id, {
+          estado_salud: editingItem.estado_salud,
+        });
+      }
+      setEditingItem(null);
+      setToast({
+        message: `${currentConfig.singular} actualizado correctamente`,
+        type: "success",
+      });
+    } catch (err) {
+      setToast({
+        message:
+          err.response?.data?.detail || "No se pudo actualizar el registro",
+        type: "error",
+      });
+    } finally {
+      setSaving(false);
     }
-    setEditingItem(null);
-    setToast({
-      message: `${currentConfig.singular} actualizado correctamente`,
-      type: "success",
-    });
   };
 
   const handleDeleteClick = (row) => setItemToDelete(row);
 
-  const handleConfirmDelete = () => {
-    if (isRazasTab) {
-      setRazas((prev) => prev.filter((r) => r.id !== itemToDelete.id));
-    } else if (isCriasTab) {
-      setCrias((prev) => prev.filter((r) => r.id !== itemToDelete.id));
-    } else if (isAlimentosTab) {
-      setAlimentos((prev) => prev.filter((r) => r.id !== itemToDelete.id));
-    } else {
-      setDataByTab((prev) => ({
-        ...prev,
-        [activeTab]: prev[activeTab].filter((r) => r.id !== itemToDelete.id),
-      }));
+  const handleConfirmDelete = async () => {
+    setSaving(true);
+    try {
+      if (activeTab === "vacunas") {
+        await deleteVacuna(itemToDelete.id);
+      }
+      setItemToDelete(null);
+      setToast({
+        message: `${currentConfig.singular} eliminado correctamente`,
+        type: "success",
+      });
+    } catch (err) {
+      setToast({
+        message:
+          err.response?.data?.detail ||
+          "No se pudo eliminar (revisa si ya tiene historial asociado)",
+        type: "error",
+      });
+    } finally {
+      setSaving(false);
     }
-    setItemToDelete(null);
-    setToast({
-      message: `${currentConfig.singular} eliminado correctamente`,
-      type: "success",
-    });
   };
 
   return (
@@ -422,9 +366,11 @@ const Catalogo = () => {
           <h1>Gestión de Catálogos</h1>
           <p>Razas · Vacunas · Alimentos · Crías · Sementales</p>
         </div>
-        <Button icon="+" onClick={handleOpenCreate}>
-          Nueva {currentConfig.singular}
-        </Button>
+        {currentConfig.canCreate && (
+          <Button icon="+" onClick={handleOpenCreate}>
+            Nueva {currentConfig.singular}
+          </Button>
+        )}
       </div>
 
       <Tabs
@@ -438,10 +384,17 @@ const Catalogo = () => {
         onSearchChange={setSearch}
         searchPlaceholder={`Buscar en ${currentConfig.label.toLowerCase()}...`}
         filters={currentConfig.filters || []}
-        moreFilters={currentConfig.moreFilters || []}
         filterValues={filterValues}
         onFilterChange={handleFilterChange}
       />
+
+      {activeTab === "sementales" && (
+        <p style={{ margin: "0 0 12px", opacity: 0.7, fontSize: "0.9rem" }}>
+          Esta pestaña es de solo lectura: muestra los bovinos marcados como
+          semental. Para agregar o quitar uno, edítalo desde "Registro de
+          Animales".
+        </p>
+      )}
 
       <div className="catalogo-card">
         <div className="catalogo-card-header">
@@ -453,8 +406,8 @@ const Catalogo = () => {
         <DataTable
           columns={currentConfig.columns}
           data={filteredData}
-          onEdit={handleEdit}
-          onDelete={handleDeleteClick}
+          onEdit={currentConfig.canEdit ? handleEdit : undefined}
+          onDelete={currentConfig.canDelete ? handleDeleteClick : undefined}
         />
       </div>
 
@@ -470,12 +423,14 @@ const Catalogo = () => {
             >
               Cancelar
             </Button>
-            <Button onClick={handleCreate}>Guardar</Button>
+            <Button onClick={handleCreate} disabled={saving}>
+              {saving ? "Guardando..." : "Guardar"}
+            </Button>
           </>
         }
       >
         <DynamicForm
-          fields={currentConfig.formFields}
+          fields={currentConfig.formFields || []}
           values={newItem}
           onChange={handleNewItemChange}
         />
@@ -490,13 +445,17 @@ const Catalogo = () => {
             <Button variant="secondary" onClick={() => setEditingItem(null)}>
               Cancelar
             </Button>
-            <Button onClick={handleSaveEdit}>Guardar</Button>
+            <Button onClick={handleSaveEdit} disabled={saving}>
+              {saving ? "Guardando..." : "Guardar"}
+            </Button>
           </>
         }
       >
         {editingItem && (
           <DynamicForm
-            fields={currentConfig.formFields}
+            fields={
+              currentConfig.editFormFields || currentConfig.formFields || []
+            }
             values={editingItem}
             onChange={handleEditChange}
           />
@@ -510,7 +469,7 @@ const Catalogo = () => {
         itemLabel={`registro de ${currentConfig.singular.toLowerCase()}`}
         itemName={itemToDelete?.nombre}
         itemId={itemToDelete?.codigo}
-        itemType={itemToDelete?.tipo || itemToDelete?.estado}
+        itemType={itemToDelete?.tipo}
       />
 
       <Toast

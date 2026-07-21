@@ -4,32 +4,64 @@ import { Mail, Lock } from "lucide-react";
 import Button from "../components/Button";
 import VacaCubicaLogo from "../assets/vaca-cubica-icon-sesion.png";
 import CowFieldImg from "../assets/vaca.png";
+import { login } from "../services/authService";
+import { useBovinos } from "../context/BovinosContext";
+import { useRazas } from "../context/RazasContext";
+import { useClientes } from "../context/ClientesContext";
+import { useCrias } from "../context/CriasContext";
+import { useAlimentos } from "../context/AlimentosContext";
+import { useVacunas } from "../context/VacunasContext";
 import "./Login.css";
-
-const TEMP_EMAIL = "admin@pedro.com";
-const TEMP_PASSWORD = "vaca_segura_123";
 
 const Login = () => {
   const navigate = useNavigate();
+  const { refetch: refetchBovinos } = useBovinos();
+  const { refetch: refetchRazas } = useRazas();
+  const { refetch: refetchClientes } = useClientes();
+  const { refetch: refetchCrias } = useCrias();
+  const { refetch: refetchAlimentos } = useAlimentos();
+  const { refetch: refetchVacunas } = useVacunas();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!email.trim() || !password.trim()) {
       setError("Ingresa tu correo y contraseña para continuar.");
       return;
     }
 
-    if (email.trim() !== TEMP_EMAIL || password !== TEMP_PASSWORD) {
-      setError("Correo o contraseña incorrectos.");
-      return;
-    }
-
     setError("");
-    navigate("/");
+    setLoading(true);
+    try {
+      await login(email.trim(), password);
+      await Promise.all([
+        refetchBovinos(),
+        refetchRazas(),
+        refetchClientes(),
+        refetchCrias(),
+        refetchAlimentos(),
+        refetchVacunas(),
+      ]);
+      navigate("/");
+    } catch (err) {
+      if (err.response?.status === 401) {
+        setError("Correo o contraseña incorrectos.");
+      } else if (err.response?.status === 403) {
+        setError("Esta cuenta ha sido desactivada.");
+      } else if (err.code === "ERR_NETWORK") {
+        setError(
+          "No se pudo conectar con el servidor. ¿Está corriendo el backend?",
+        );
+      } else {
+        setError("Ocurrió un error al iniciar sesión.");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleKeyDown = (e) => {
@@ -93,8 +125,12 @@ const Login = () => {
             Recordarme
           </label>
 
-          <Button className="login-submit" onClick={handleSubmit}>
-            Iniciar Sesión
+          <Button
+            className="login-submit"
+            onClick={handleSubmit}
+            disabled={loading}
+          >
+            {loading ? "Ingresando..." : "Iniciar Sesión"}
           </Button>
 
           <p className="login-forgot">

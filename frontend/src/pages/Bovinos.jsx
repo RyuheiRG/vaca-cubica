@@ -1,4 +1,4 @@
-import {useState, useMemo} from "react";
+import { useState, useMemo } from "react";
 import Button from "../components/Button";
 import DataTable from "../components/DataTable";
 import Modal from "../components/Modal";
@@ -8,65 +8,94 @@ import StatCard from "../components/StatCard";
 import FilterBar from "../components/FilterBar";
 import Pagination from "../components/Pagination";
 import DynamicForm from "../components/DynamicForm";
-import {useBovinos} from "../context/BovinosContext";
-import {useRazas} from "../context/RazasContext";
+import { useBovinos } from "../context/BovinosContext";
+import { useRazas } from "../context/RazasContext";
+import AsyncState from "../components/AsyncState";
+import { getFriendlyErrorMessage } from "../utils/errorMessage";
 import BovinoIcon from "../assets/bovino.png";
 import "./Bovinos.css";
 
 const PAGE_SIZE = 5;
 
+const ESTADOS = ["activo", "vendido", "cuarentena", "fallecido"];
+const SEXOS = ["macho", "hembra"];
+
+const capitalize = (str) =>
+  str ? str.charAt(0).toUpperCase() + str.slice(1) : str;
+
+const calcularEdad = (fechaNacimiento) => {
+  if (!fechaNacimiento) return "—";
+  const nacimiento = new Date(fechaNacimiento);
+  const años =
+    (Date.now() - nacimiento.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
+  return `${Math.floor(años)} años`;
+};
+
 const animalRender = (row) => (
   <div className="bovino-cell">
     <span className="bovino-avatar">
-      <img src={BovinoIcon} alt="Bovino" style={{width: 18, height: 18}} />
+      <img src={BovinoIcon} alt="Bovino" style={{ width: 18, height: 18 }} />
     </span>
     <div>
-      <div className="bovino-name">{row.nombre}</div>
-      <div className="bovino-code">{row.codigo}</div>
+      <div className="bovino-name">{row.nombre || "—"}</div>
+      <div className="bovino-code">{row.arete}</div>
     </div>
   </div>
 );
 
 const columns = [
-  {key: "nombre", label: "Animal", render: animalRender},
-  {key: "tipoRaza", label: "Raza"},
-  {key: "sexo", label: "Sexo", badge: true},
-  {key: "edad", label: "Edad"},
-  {key: "peso", label: "Peso"},
-  {key: "estado", label: "Estado", badge: true},
+  { key: "nombre", label: "Animal", render: animalRender },
+  { key: "tipoRaza", label: "Raza" },
+  { key: "sexoLabel", label: "Sexo", badge: true },
+  { key: "edad", label: "Edad" },
+  { key: "pesoLabel", label: "Peso" },
+  { key: "estadoLabel", label: "Estado", badge: true },
 ];
 
 const emptyBovino = {
   nombre: "",
-  codigo: "",
-  tipoRaza: "",
+  arete: "",
+  raza_id: "",
   sexo: "",
-  edad: "",
-  peso: "",
-  estado: "",
+  fecha_nacimiento: "",
+  fecha_ingreso: "",
+  peso_ingreso: "",
+  estado: "activo",
 };
 
 const Bovinos = () => {
-  const {bovinos, setBovinos} = useBovinos();
-  const {razas} = useRazas();
+  const { bovinos, loading, error, refetch, createBovino, updateBovino } =
+    useBovinos();
+  const { razas, getRazaById } = useRazas();
 
   const formFields = [
-    {key: "nombre", label: "Nombre"},
-    {key: "codigo", label: "Código", placeholder: "B-006"},
+    { key: "nombre", label: "Nombre" },
+    { key: "arete", label: "Arete", placeholder: "B-006" },
     {
-      key: "tipoRaza",
+      key: "raza_id",
       label: "Raza",
       type: "select",
-      options: razas.map((r) => r.nombre),
+      options: razas.map((r) => ({ value: r.id, label: r.nombre })),
     },
-    {key: "sexo", label: "Sexo", type: "select", options: ["Macho", "Hembra"]},
-    {key: "edad", label: "Edad", placeholder: "3 años"},
-    {key: "peso", label: "Peso", placeholder: "450 kg"},
+    {
+      key: "sexo",
+      label: "Sexo",
+      type: "select",
+      options: SEXOS.map((s) => ({ value: s, label: capitalize(s) })),
+    },
+    { key: "fecha_nacimiento", label: "Fecha de nacimiento", type: "date" },
+    { key: "fecha_ingreso", label: "Fecha de ingreso", type: "date" },
+    {
+      key: "peso_ingreso",
+      label: "Peso de ingreso (kg)",
+      type: "number",
+      placeholder: "450",
+    },
     {
       key: "estado",
       label: "Estado",
       type: "select",
-      options: ["Saludable", "En Observación", "Enfermo"],
+      options: ESTADOS.map((e) => ({ value: e, label: capitalize(e) })),
     },
   ];
 
@@ -79,18 +108,34 @@ const Bovinos = () => {
   const [editingItem, setEditingItem] = useState(null);
   const [itemToDelete, setItemToDelete] = useState(null);
   const [toast, setToast] = useState(null);
+  const [saving, setSaving] = useState(false);
+
+  // Enriquecemos cada bovino (que viene "crudo" de la API) con los
+  // campos que la UI necesita para mostrarse (nombre de raza, edad, etc).
+  const displayData = useMemo(
+    () =>
+      bovinos.map((b) => ({
+        ...b,
+        tipoRaza: getRazaById(b.raza_id).nombre,
+        sexoLabel: capitalize(b.sexo),
+        edad: calcularEdad(b.fecha_nacimiento),
+        pesoLabel: `${b.peso_ingreso} kg`,
+        estadoLabel: capitalize(b.estado),
+      })),
+    [bovinos, razas], // eslint-disable-line react-hooks/exhaustive-deps
+  );
 
   const filters = [
-    {key: "sexo", placeholder: "Sexo", options: ["Macho", "Hembra"]},
+    { key: "sexoLabel", placeholder: "Sexo", options: SEXOS.map(capitalize) },
     {
-      key: "estado",
+      key: "estadoLabel",
       placeholder: "Estado",
-      options: ["Saludable", "En Observación", "Enfermo"],
+      options: ESTADOS.map(capitalize),
     },
   ];
 
   const filteredData = useMemo(() => {
-    let result = bovinos;
+    let result = displayData;
     if (search.trim()) {
       const term = search.toLowerCase();
       result = result.filter((row) =>
@@ -103,32 +148,32 @@ const Bovinos = () => {
       if (value) result = result.filter((row) => row[key] === value);
     });
     return result;
-  }, [bovinos, search, filterValues]);
+  }, [displayData, search, filterValues]);
 
   const totalPages = Math.max(1, Math.ceil(filteredData.length / PAGE_SIZE));
   const pageData = filteredData.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const stats = [
-    {label: "Total Animales", value: bovinos.length, variant: "neutral"},
+    { label: "Total Animales", value: displayData.length, variant: "neutral" },
     {
-      label: "Saludables",
-      value: bovinos.filter((b) => b.estado === "Saludable").length,
+      label: "Activos",
+      value: displayData.filter((b) => b.estado === "activo").length,
       variant: "info",
     },
     {
-      label: "En Observación",
-      value: bovinos.filter((b) => b.estado === "En Observación").length,
+      label: "En Cuarentena",
+      value: displayData.filter((b) => b.estado === "cuarentena").length,
       variant: "warning",
     },
     {
-      label: "Enfermos",
-      value: bovinos.filter((b) => b.estado === "Enfermo").length,
+      label: "Fallecidos",
+      value: displayData.filter((b) => b.estado === "fallecido").length,
       variant: "danger",
     },
   ];
 
   const handleFilterChange = (key, value) => {
-    setFilterValues((prev) => ({...prev, [key]: value}));
+    setFilterValues((prev) => ({ ...prev, [key]: value }));
     setPage(1);
   };
 
@@ -143,38 +188,81 @@ const Bovinos = () => {
   };
 
   const handleNewItemChange = (field, value) => {
-    setNewItem((prev) => ({...prev, [field]: value}));
+    setNewItem((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleCreate = () => {
-    const nextId = bovinos.length
-      ? Math.max(...bovinos.map((b) => b.id)) + 1
-      : 1;
-    setBovinos((prev) => [...prev, {id: nextId, ...newItem}]);
-    setShowCreateModal(false);
-    setToast({message: "Bovino registrado correctamente", type: "success"});
+  const handleCreate = async () => {
+    setSaving(true);
+    try {
+      await createBovino({
+        ...newItem,
+        raza_id: Number(newItem.raza_id),
+        peso_ingreso: Number(newItem.peso_ingreso),
+        fecha_nacimiento: newItem.fecha_nacimiento || null,
+      });
+      setShowCreateModal(false);
+      setToast({ message: "Bovino registrado correctamente", type: "success" });
+    } catch (err) {
+      setToast({
+        message: err.response?.data?.detail || "No se pudo registrar el bovino",
+        type: "error",
+      });
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleEdit = (row) => setEditingItem(row);
 
   const handleEditChange = (field, value) => {
-    setEditingItem((prev) => ({...prev, [field]: value}));
+    setEditingItem((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSaveEdit = () => {
-    setBovinos((prev) =>
-      prev.map((b) => (b.id === editingItem.id ? editingItem : b)),
-    );
-    setEditingItem(null);
-    setToast({message: "Bovino actualizado correctamente", type: "success"});
+  // El backend solo permite editar nombre, estado y es_semental (BovinoUpdate).
+  const handleSaveEdit = async () => {
+    setSaving(true);
+    try {
+      await updateBovino(editingItem.id, {
+        nombre: editingItem.nombre,
+        estado: editingItem.estado,
+        es_semental: editingItem.es_semental,
+      });
+      setEditingItem(null);
+      setToast({
+        message: "Bovino actualizado correctamente",
+        type: "success",
+      });
+    } catch (err) {
+      setToast({
+        message:
+          err.response?.data?.detail || "No se pudo actualizar el bovino",
+        type: "error",
+      });
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleDeleteClick = (row) => setItemToDelete(row);
 
-  const handleConfirmDelete = () => {
-    setBovinos((prev) => prev.filter((b) => b.id !== itemToDelete.id));
-    setItemToDelete(null);
-    setToast({message: "Bovino eliminado correctamente", type: "success"});
+  const handleConfirmDelete = async () => {
+    setSaving(true);
+    try {
+      await updateBovino(itemToDelete.id, { estado: "fallecido" });
+      setItemToDelete(null);
+      setToast({
+        message: "Bovino marcado como fallecido (no se puede eliminar vía API)",
+        type: "success",
+      });
+    } catch (err) {
+      setToast({
+        message:
+          err.response?.data?.detail || "No se pudo actualizar el bovino",
+        type: "error",
+      });
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -203,26 +291,34 @@ const Bovinos = () => {
       <FilterBar
         search={search}
         onSearchChange={handleSearchChange}
-        searchPlaceholder="Buscar por nombre o código..."
+        searchPlaceholder="Buscar por nombre o arete..."
         filters={filters}
         filterValues={filterValues}
         onFilterChange={handleFilterChange}
       />
 
       <div className="bovinos-card">
-        <DataTable
-          columns={columns}
-          data={pageData}
-          onEdit={handleEdit}
-          onDelete={handleDeleteClick}
-        />
-        <Pagination
-          currentPage={page}
-          totalPages={totalPages}
-          onPageChange={setPage}
-          totalItems={filteredData.length}
-          pageSize={PAGE_SIZE}
-        />
+        <AsyncState
+          loading={loading}
+          error={error ? getFriendlyErrorMessage(error) : null}
+          isEmpty={bovinos.length === 0}
+          emptyMessage="Aún no hay bovinos registrados. Usa 'Agregar Bovino' para crear el primero."
+          onRetry={refetch}
+        >
+          <DataTable
+            columns={columns}
+            data={pageData}
+            onEdit={handleEdit}
+            onDelete={handleDeleteClick}
+          />
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={setPage}
+            totalItems={filteredData.length}
+            pageSize={PAGE_SIZE}
+          />
+        </AsyncState>
       </div>
 
       <Modal
@@ -237,7 +333,9 @@ const Bovinos = () => {
             >
               Cancelar
             </Button>
-            <Button onClick={handleCreate}>Guardar</Button>
+            <Button onClick={handleCreate} disabled={saving}>
+              {saving ? "Guardando..." : "Guardar"}
+            </Button>
           </>
         }
       >
@@ -257,13 +355,26 @@ const Bovinos = () => {
             <Button variant="secondary" onClick={() => setEditingItem(null)}>
               Cancelar
             </Button>
-            <Button onClick={handleSaveEdit}>Guardar</Button>
+            <Button onClick={handleSaveEdit} disabled={saving}>
+              {saving ? "Guardando..." : "Guardar"}
+            </Button>
           </>
         }
       >
         {editingItem && (
           <DynamicForm
-            fields={formFields}
+            fields={[
+              { key: "nombre", label: "Nombre" },
+              {
+                key: "estado",
+                label: "Estado",
+                type: "select",
+                options: ESTADOS.map((e) => ({
+                  value: e,
+                  label: capitalize(e),
+                })),
+              },
+            ]}
             values={editingItem}
             onChange={handleEditChange}
           />
@@ -276,7 +387,7 @@ const Bovinos = () => {
         onConfirm={handleConfirmDelete}
         itemLabel="registro de bovino"
         itemName={itemToDelete?.nombre}
-        itemId={itemToDelete?.codigo}
+        itemId={itemToDelete?.arete}
         itemType={itemToDelete?.tipoRaza}
       />
 

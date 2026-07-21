@@ -1,4 +1,5 @@
-import {NavLink, Outlet, useNavigate} from "react-router-dom";
+import { NavLink, Outlet } from "react-router-dom";
+import { logout } from "../services/authService";
 import "./Layout.css";
 
 import VacaCubicaLogo from "../assets/vaca-cubica-icon.png";
@@ -11,10 +12,9 @@ import AnaliticoIcon from "../assets/analitico.png";
 import VentasIcon from "../assets/ventas.png";
 
 const Layout = () => {
-  const navigate = useNavigate();
-
   const handleLogout = () => {
-    navigate("/login");
+    logout();
+    window.location.href = "/login";
   };
 
   return (

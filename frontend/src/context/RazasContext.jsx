@@ -1,53 +1,65 @@
-import {createContext, useContext, useState} from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from "react";
+import api from "../services/api";
 
 const RazasContext = createContext(null);
 
-const initialRazas = [
-  {
-    id: 1,
-    codigo: "RZ-001",
-    nombre: "Angus",
-    origen: "Escocia",
-    tipo: "Cárnica",
-    peso: "550 kg",
-    resistencia: "Alta",
-    descripcion: "Raza cárnica de élite, sin cuernos",
-    estado: "Activa",
-  },
-  {
-    id: 2,
-    codigo: "RZ-002",
-    nombre: "Hereford",
-    origen: "Inglaterra",
-    tipo: "Cárnica",
-    peso: "520 kg",
-    resistencia: "Alta",
-    descripcion: "Raza rústica, buena conversión",
-    estado: "Activa",
-  },
-  {
-    id: 3,
-    codigo: "RZ-003",
-    nombre: "Holstein",
-    origen: "Países Bajos",
-    tipo: "Lechera",
-    peso: "650 kg",
-    resistencia: "Media",
-    descripcion: "Mayor productora de leche",
-    estado: "Activa",
-  },
-];
+export const RazasProvider = ({ children }) => {
+  const [razas, setRazas] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-export const RazasProvider = ({children}) => {
-  const [razas, setRazas] = useState(initialRazas);
+  const fetchRazas = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { data } = await api.get("/api/razas/");
+      setRazas(data);
+    } catch (err) {
+      setError(err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchRazas();
+  }, [fetchRazas]);
+
+  const createRaza = async (razaIn) => {
+    const { data } = await api.post("/api/razas/", razaIn);
+    setRazas((prev) => [...prev, data]);
+    return data;
+  };
 
   const getRazaByNombre = (nombre) => {
     const found = razas.find((r) => r.nombre === nombre);
-    return found || {nombre: "—"};
+    return found || { nombre: "—" };
+  };
+
+  const getRazaById = (id) => {
+    const found = razas.find((r) => r.id === id);
+    return found || { nombre: "—" };
   };
 
   return (
-    <RazasContext.Provider value={{razas, setRazas, getRazaByNombre}}>
+    <RazasContext.Provider
+      value={{
+        razas,
+        setRazas,
+        loading,
+        error,
+        refetch: fetchRazas,
+        createRaza,
+        getRazaByNombre,
+        getRazaById,
+      }}
+    >
       {children}
     </RazasContext.Provider>
   );

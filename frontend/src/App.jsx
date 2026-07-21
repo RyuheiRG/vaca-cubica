@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import Layout from "./components/Layout";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 import Login from "./pages/Login";
 import Inicio from "./pages/Inicio";
@@ -16,14 +17,16 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
 
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Inicio />} />
+        <Route element={<ProtectedRoute />}>
+          <Route path="/" element={<Layout />}>
+            <Route index element={<Inicio />} />
 
-          <Route path="bovinos" element={<Bovinos />} />
-          <Route path="bitacora" element={<Bitacora />} />
-          <Route path="catalogo" element={<Catalogo />} />
-          <Route path="ventas" element={<Ventas />} />
-          <Route path="estadisticas" element={<Estadisticas />} />
+            <Route path="bovinos" element={<Bovinos />} />
+            <Route path="bitacora" element={<Bitacora />} />
+            <Route path="catalogo" element={<Catalogo />} />
+            <Route path="ventas" element={<Ventas />} />
+            <Route path="estadisticas" element={<Estadisticas />} />
+          </Route>
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

@@ -1,33 +1,57 @@
-import {createContext, useContext, useState} from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from "react";
+import api from "../services/api";
 
 const AlimentosContext = createContext(null);
 
-const initialAlimentos = [
-  {
-    id: 1,
-    codigo: "ALI-001",
-    nombre: "Forraje verde",
-    tipo: "Forraje",
-    proveedor: "Agroinsumos del Valle",
-    costoUnitario: "$3.50/kg",
-    estado: "Activa",
-  },
-  {
-    id: 2,
-    codigo: "ALI-002",
-    nombre: "Concentrado 18% PC",
-    tipo: "Concentrado",
-    proveedor: "Nutrimentos SA",
-    costoUnitario: "$8.20/kg",
-    estado: "Activa",
-  },
-];
+export const AlimentosProvider = ({ children }) => {
+  // El backend solo maneja: id, nombre, tipo (no proveedor/costo/estado).
+  const [alimentos, setAlimentos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-export const AlimentosProvider = ({children}) => {
-  const [alimentos, setAlimentos] = useState(initialAlimentos);
+  const fetchAlimentos = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { data } = await api.get("/api/alimentos/");
+      setAlimentos(data);
+    } catch (err) {
+      setError(err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchAlimentos();
+  }, [fetchAlimentos]);
+
+  // No existe PATCH ni DELETE de alimentos en el backend: solo se puede
+  // listar y crear. Si tu app necesita editar/borrar, hay que agregar
+  // esos endpoints en el backend primero.
+  const createAlimento = async (alimentoIn) => {
+    const { data } = await api.post("/api/alimentos/", alimentoIn);
+    setAlimentos((prev) => [...prev, data]);
+    return data;
+  };
 
   return (
-    <AlimentosContext.Provider value={{alimentos, setAlimentos}}>
+    <AlimentosContext.Provider
+      value={{
+        alimentos,
+        setAlimentos,
+        loading,
+        error,
+        refetch: fetchAlimentos,
+        createAlimento,
+      }}
+    >
       {children}
     </AlimentosContext.Provider>
   );
