@@ -26,6 +26,22 @@ const badgeStyles = {
   Saludable: {bg: "#e8f5e9", color: "#2e7d32"},
   "En Observación": {bg: "#fff4e5", color: "#b45309"},
   Enfermo: {bg: "#fde8ec", color: "#e11d48"},
+
+  // Estado del bovino (Bovinos y Sementales)
+  Activo: {bg: "#e8f5e9", color: "#2e7d32"},
+  Vendido: {bg: "#e0f2fe", color: "#0369a1"},
+  Cuarentena: {bg: "#fef9c3", color: "#a16207"},
+
+  // Estado de salud de la cría
+  Excelente: {bg: "#e8f5e9", color: "#2e7d32"},
+  Bueno: {bg: "#e0f2fe", color: "#0369a1"},
+  Observacion: {bg: "#fff4e5", color: "#b45309"},
+  Critico: {bg: "#fde8ec", color: "#e11d48"},
+  Fallecido: {bg: "#e5e7eb", color: "#475569"},
+
+  // Categoría de movimiento comercial (Ventas)
+  Venta: {bg: "#e8f5e9", color: "#2e7d32"},
+  Renta: {bg: "#e0f2fe", color: "#0369a1"},
 };
 
 const Badge = ({value}) => {

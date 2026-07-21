@@ -3,7 +3,6 @@ import {User, ArrowRight} from "lucide-react";
 import Button from "../components/Button";
 import DataTable from "../components/DataTable";
 import Modal from "../components/Modal";
-import ConfirmDeleteModal from "../components/ConfirmDeleteModal";
 import Toast from "../components/Toast";
 import Tabs from "../components/Tabs";
 import FilterBar from "../components/FilterBar";
@@ -11,141 +10,152 @@ import VentaForm from "../components/VentaForm";
 import ClienteForm from "../components/ClienteForm";
 import {useBovinos} from "../context/BovinosContext";
 import {useClientes} from "../context/ClientesContext";
+import {useVentas} from "../context/VentasContext";
 import "./Ventas.css";
 
-const ventaColumns = (getClienteById) => [
-  {key: "idTransaccion", label: "ID Transacción"},
-  {key: "idBovino", label: "ID Bovino"},
+const formatMoney = (value) =>
+  `$${Number(value).toLocaleString("es-MX", {minimumFractionDigits: 2})} MXN`;
+
+const movimientoColumns = (getBovinoById, getClienteById) => [
+  {key: "idLabel", label: "ID"},
+  {
+    key: "bovino",
+    label: "Bovino",
+    render: (row) => {
+      const b = getBovinoById(row.bovino_id);
+      return `${b.arete} — ${b.nombre || "sin nombre"}`;
+    },
+  },
   {
     key: "cliente",
-    label: "Nombre Cliente",
-    render: (row) => getClienteById(row.idCliente).nombre,
+    label: "Cliente",
+    render: (row) => getClienteById(row.cliente_id).nombre,
   },
-  {key: "categoria", label: "Categoría"},
-  {key: "Costo", label: "Costo"},
-  {key: "Fecha", label: "Fecha"},
+  {key: "categoria", label: "Categoría", badge: true},
+  {key: "costoLabel", label: "Costo"},
+  {key: "fechaLabel", label: "Fecha"},
 ];
 
 const clienteColumns = [
-  {key: "idCliente", label: "ID Cliente"},
+  {key: "id", label: "ID"},
   {key: "nombre", label: "Nombre / Empresa"},
-  {key: "tipo", label: "Tipo"},
   {key: "telefono", label: "Teléfono"},
-  {key: "correo", label: "Correo"},
 ];
 
 const emptyVenta = {
-  idBovino: "",
-  idCliente: "",
   categoria: "Venta",
-  Costo: "",
-  Fecha: "",
-  notas: "",
+  bovino_id: "",
+  cliente_id: "",
+  fecha_venta: "",
+  precio_final: "",
+  fecha_inicio: "",
+  fecha_fin: "",
+  costo_total: "",
 };
 
 const emptyCliente = {
   nombre: "",
-  rfc: "",
-  tipo: "",
-  direccion: "",
   telefono: "",
-  correo: "",
-  notas: "",
 };
 
 const filterConfig = {
   movimientos: {
-    placeholder: "Buscar por cliente, ID de transacción...",
+    placeholder: "Buscar por cliente, bovino...",
     filters: [
       {key: "categoria", placeholder: "Categoría", options: ["Venta", "Renta"]},
     ],
   },
   clientes: {
-    placeholder: "Buscar por nombre, correo...",
-    filters: [
-      {
-        key: "tipo",
-        placeholder: "Tipo",
-        options: ["Agro", "Particular", "Distribuidor"],
-      },
-    ],
+    placeholder: "Buscar por nombre, teléfono...",
+    filters: [],
   },
 };
 
 const Ventas = () => {
-  const {bovinos} = useBovinos();
-  const {clientes, setClientes, getClienteById} = useClientes();
+  const {bovinos, getBovinoById} = useBovinos();
+  const {clientes, createCliente, getClienteById} = useClientes();
+  const {ventas, rentas, createVenta, createRenta} = useVentas();
 
   const [activeTab, setActiveTab] = useState("movimientos");
 
-  const [ventas, setVentas] = useState([
-    {
-      id: 1,
-      idTransaccion: "TX-001",
-      idBovino: "B-001",
-      idCliente: "CLI-001",
-      categoria: "Venta",
-      Costo: "$5,500.00",
-      Fecha: "20/05/2024",
-    },
-    {
-      id: 2,
-      idTransaccion: "TX-002",
-      idBovino: "B-002",
-      idCliente: "CLI-001",
-      categoria: "Venta",
-      Costo: "$6,000.00",
-      Fecha: "20/05/2024",
-    },
-    {
-      id: 3,
-      idTransaccion: "TX-003",
-      idBovino: "B-003",
-      idCliente: "CLI-001",
-      categoria: "Venta",
-      Costo: "$7,000.00",
-      Fecha: "20/05/2024",
-    },
-  ]);
-
-  const [editingRow, setEditingRow] = useState(null);
-  const [rowToDelete, setRowToDelete] = useState(null);
   const [toast, setToast] = useState(null);
 
   const [showVentaModal, setShowVentaModal] = useState(false);
   const [newVenta, setNewVenta] = useState(emptyVenta);
+  const [savingVenta, setSavingVenta] = useState(false);
 
   const [showClienteModal, setShowClienteModal] = useState(false);
   const [newCliente, setNewCliente] = useState(emptyCliente);
-
-  const [editingCliente, setEditingCliente] = useState(null);
-  const [clienteToDelete, setClienteToDelete] = useState(null);
+  const [savingCliente, setSavingCliente] = useState(false);
 
   const [search, setSearch] = useState("");
   const [filterValues, setFilterValues] = useState({});
 
+  // El backend solo permite vender bovinos activos, y solo rentar
+  // sementales (machos, activos, marcados como semental).
+  const bovinosParaVenta = useMemo(
+    () => bovinos.filter((b) => b.estado === "activo"),
+    [bovinos],
+  );
+  const bovinosParaRenta = useMemo(
+    () =>
+      bovinos.filter(
+        (b) => b.es_semental && b.sexo === "macho" && b.estado === "activo",
+      ),
+    [bovinos],
+  );
+  const bovinosDisponibles =
+    newVenta.categoria === "Renta" ? bovinosParaRenta : bovinosParaVenta;
+
+  const movimientos = useMemo(() => {
+    const ventasMapeadas = ventas.map((v) => ({
+      id: `V-${v.id}`,
+      idLabel: `VTA-${String(v.id).padStart(3, "0")}`,
+      bovino_id: v.bovino_id,
+      cliente_id: v.cliente_id,
+      categoria: "Venta",
+      costoLabel: formatMoney(v.precio_final),
+      fechaLabel: v.fecha_venta,
+      fechaOrden: v.fecha_venta,
+    }));
+    const rentasMapeadas = rentas.map((r) => ({
+      id: `R-${r.id}`,
+      idLabel: `RTA-${String(r.id).padStart(3, "0")}`,
+      bovino_id: r.bovino_id,
+      cliente_id: r.cliente_id,
+      categoria: "Renta",
+      costoLabel: formatMoney(r.costo_total),
+      fechaLabel: r.fecha_fin
+        ? `${r.fecha_inicio} – ${r.fecha_fin}`
+        : `Desde ${r.fecha_inicio}`,
+      fechaOrden: r.fecha_inicio,
+    }));
+    return [...ventasMapeadas, ...rentasMapeadas].sort((a, b) =>
+      b.fechaOrden.localeCompare(a.fechaOrden),
+    );
+  }, [ventas, rentas]);
+
   const tabs = [
-    {key: "movimientos", label: "Movimientos", count: ventas.length},
+    {key: "movimientos", label: "Movimientos", count: movimientos.length},
     {key: "clientes", label: "Clientes", count: clientes.length},
   ];
 
-  const filteredVentas = useMemo(() => {
-    let result = ventas;
+  const filteredMovimientos = useMemo(() => {
+    let result = movimientos;
     if (search.trim()) {
       const term = search.toLowerCase();
       result = result.filter(
         (row) =>
-          Object.values(row).some((val) =>
-            String(val).toLowerCase().includes(term),
-          ) ||
-          getClienteById(row.idCliente).nombre.toLowerCase().includes(term),
+          getBovinoById(row.bovino_id).arete?.toLowerCase().includes(term) ||
+          getBovinoById(row.bovino_id).nombre?.toLowerCase().includes(term) ||
+          getClienteById(row.cliente_id).nombre.toLowerCase().includes(term),
       );
     }
     if (filterValues.categoria) {
       result = result.filter((row) => row.categoria === filterValues.categoria);
     }
     return result;
-  }, [ventas, search, filterValues, getClienteById]);
+  }, [movimientos, search, filterValues, getBovinoById, getClienteById]);
 
   const filteredClientes = useMemo(() => {
     let result = clientes;
@@ -157,11 +167,8 @@ const Ventas = () => {
         ),
       );
     }
-    if (filterValues.tipo) {
-      result = result.filter((row) => row.tipo === filterValues.tipo);
-    }
     return result;
-  }, [clientes, search, filterValues]);
+  }, [clientes, search]);
 
   const handleTabChange = (key) => {
     setActiveTab(key);
@@ -173,77 +180,74 @@ const Ventas = () => {
     setFilterValues((prev) => ({...prev, [key]: value}));
   };
 
-  const handleEdit = (row) => setEditingRow(row);
-  const handleDeleteClick = (row) => setRowToDelete(row);
-
-  const handleConfirmDelete = () => {
-    setVentas((prev) => prev.filter((v) => v.id !== rowToDelete.id));
-    setRowToDelete(null);
-    setToast({message: "Registro eliminado correctamente", type: "success"});
-  };
-
-  const handleChange = (field, value) => {
-    setEditingRow((prev) => ({...prev, [field]: value}));
-  };
-
-  const handleSave = () => {
-    setVentas((prev) =>
-      prev.map((v) => (v.id === editingRow.id ? editingRow : v)),
-    );
-    setEditingRow(null);
-    setToast({message: "Cambios guardados correctamente", type: "success"});
+  const handleOpenVentaModal = () => {
+    setNewVenta(emptyVenta);
+    setShowVentaModal(true);
   };
 
   const handleNewVentaChange = (field, value) => {
     setNewVenta((prev) => ({...prev, [field]: value}));
   };
 
-  const handleCreateVenta = () => {
-    const nextId = ventas.length ? Math.max(...ventas.map((v) => v.id)) + 1 : 1;
-    const idTransaccion = `TX-${String(nextId).padStart(3, "0")}`;
+  const handleCreateVenta = async () => {
+    setSavingVenta(true);
+    try {
+      if (newVenta.categoria === "Renta") {
+        await createRenta({
+          bovino_id: Number(newVenta.bovino_id),
+          cliente_id: Number(newVenta.cliente_id),
+          fecha_inicio: newVenta.fecha_inicio,
+          fecha_fin: newVenta.fecha_fin || null,
+          costo_total: Number(newVenta.costo_total),
+        });
+      } else {
+        await createVenta({
+          bovino_id: Number(newVenta.bovino_id),
+          cliente_id: Number(newVenta.cliente_id),
+          fecha_venta: newVenta.fecha_venta,
+          precio_final: Number(newVenta.precio_final),
+        });
+      }
+      setShowVentaModal(false);
+      setToast({
+        message: `${newVenta.categoria} registrada correctamente`,
+        type: "success",
+      });
+    } catch (err) {
+      setToast({
+        message:
+          err.response?.data?.detail || "No se pudo registrar el movimiento",
+        type: "error",
+      });
+    } finally {
+      setSavingVenta(false);
+    }
+  };
 
-    setVentas((prev) => [...prev, {id: nextId, idTransaccion, ...newVenta}]);
-    setNewVenta(emptyVenta);
-    setShowVentaModal(false);
-    setToast({message: "Venta registrada correctamente", type: "success"});
+  const handleOpenClienteModal = () => {
+    setNewCliente(emptyCliente);
+    setShowClienteModal(true);
   };
 
   const handleNewClienteChange = (field, value) => {
     setNewCliente((prev) => ({...prev, [field]: value}));
   };
 
-  const handleCreateCliente = () => {
-    const nextId = clientes.length
-      ? Math.max(...clientes.map((c) => c.id)) + 1
-      : 1;
-    const idCliente = `CLI-${String(nextId).padStart(3, "0")}`;
-
-    setClientes((prev) => [...prev, {id: nextId, idCliente, ...newCliente}]);
-    setNewCliente(emptyCliente);
-    setShowClienteModal(false);
-    setToast({message: "Cliente registrado correctamente", type: "success"});
-  };
-
-  const handleEditCliente = (row) => setEditingCliente(row);
-
-  const handleChangeCliente = (field, value) => {
-    setEditingCliente((prev) => ({...prev, [field]: value}));
-  };
-
-  const handleSaveCliente = () => {
-    setClientes((prev) =>
-      prev.map((c) => (c.id === editingCliente.id ? editingCliente : c)),
-    );
-    setEditingCliente(null);
-    setToast({message: "Cliente actualizado correctamente", type: "success"});
-  };
-
-  const handleDeleteClienteClick = (row) => setClienteToDelete(row);
-
-  const handleConfirmDeleteCliente = () => {
-    setClientes((prev) => prev.filter((c) => c.id !== clienteToDelete.id));
-    setClienteToDelete(null);
-    setToast({message: "Cliente eliminado correctamente", type: "success"});
+  const handleCreateCliente = async () => {
+    setSavingCliente(true);
+    try {
+      await createCliente(newCliente);
+      setShowClienteModal(false);
+      setToast({message: "Cliente registrado correctamente", type: "success"});
+    } catch (err) {
+      setToast({
+        message:
+          err.response?.data?.detail || "No se pudo registrar el cliente",
+        type: "error",
+      });
+    } finally {
+      setSavingCliente(false);
+    }
   };
 
   return (
@@ -256,10 +260,10 @@ const Ventas = () => {
       </div>
 
       <div style={{display: "flex", gap: "1rem", marginTop: "1.5rem"}}>
-        <Button icon="+" onClick={() => setShowVentaModal(true)}>
+        <Button icon="+" onClick={handleOpenVentaModal}>
           Registrar Venta o Renta de Bovino
         </Button>
-        <Button icon="+" onClick={() => setShowClienteModal(true)}>
+        <Button icon="+" onClick={handleOpenClienteModal}>
           Registrar Catálogo de Clientes
         </Button>
       </div>
@@ -280,14 +284,12 @@ const Ventas = () => {
           <div className="ventas-card-header">
             <h3>
               Listado General de Movimientos{" "}
-              <span>— {filteredVentas.length} registros</span>
+              <span>— {filteredMovimientos.length} registros</span>
             </h3>
           </div>
           <DataTable
-            columns={ventaColumns(getClienteById)}
-            data={filteredVentas}
-            onEdit={handleEdit}
-            onDelete={handleDeleteClick}
+            columns={movimientoColumns(getBovinoById, getClienteById)}
+            data={filteredMovimientos}
           />
         </div>
       )}
@@ -300,39 +302,9 @@ const Ventas = () => {
               <span>— {filteredClientes.length} registros</span>
             </h3>
           </div>
-          <DataTable
-            columns={clienteColumns}
-            data={filteredClientes}
-            onEdit={handleEditCliente}
-            onDelete={handleDeleteClienteClick}
-          />
+          <DataTable columns={clienteColumns} data={filteredClientes} />
         </div>
       )}
-
-      <Modal
-        isOpen={!!editingRow}
-        onClose={() => setEditingRow(null)}
-        title="Editar Venta"
-        footer={
-          <>
-            <Button variant="secondary" onClick={() => setEditingRow(null)}>
-              Cancelar
-            </Button>
-            <Button onClick={handleSave} iconRight={<ArrowRight size={16} />}>
-              Guardar
-            </Button>
-          </>
-        }
-      >
-        {editingRow && (
-          <VentaForm
-            values={editingRow}
-            onChange={handleChange}
-            bovinos={bovinos}
-            clientes={clientes}
-          />
-        )}
-      </Modal>
 
       <Modal
         isOpen={showVentaModal}
@@ -348,9 +320,10 @@ const Ventas = () => {
             </Button>
             <Button
               onClick={handleCreateVenta}
+              disabled={savingVenta}
               iconRight={<ArrowRight size={16} />}
             >
-              Guardar
+              {savingVenta ? "Guardando..." : "Guardar"}
             </Button>
           </>
         }
@@ -358,7 +331,7 @@ const Ventas = () => {
         <VentaForm
           values={newVenta}
           onChange={handleNewVentaChange}
-          bovinos={bovinos}
+          bovinos={bovinosDisponibles}
           clientes={clientes}
         />
       </Modal>
@@ -379,61 +352,17 @@ const Ventas = () => {
             </Button>
             <Button
               onClick={handleCreateCliente}
+              disabled={savingCliente}
               icon={<User size={16} />}
               iconRight={<ArrowRight size={16} />}
             >
-              Crear
+              {savingCliente ? "Guardando..." : "Crear"}
             </Button>
           </>
         }
       >
         <ClienteForm values={newCliente} onChange={handleNewClienteChange} />
       </Modal>
-
-      <Modal
-        isOpen={!!editingCliente}
-        onClose={() => setEditingCliente(null)}
-        title="Editar Cliente"
-        subtitle="Actualiza los datos del cliente o empresa"
-        icon={<User size={16} />}
-        footer={
-          <>
-            <Button variant="secondary" onClick={() => setEditingCliente(null)}>
-              Cancelar
-            </Button>
-            <Button
-              onClick={handleSaveCliente}
-              iconRight={<ArrowRight size={16} />}
-            >
-              Guardar
-            </Button>
-          </>
-        }
-      >
-        {editingCliente && (
-          <ClienteForm values={editingCliente} onChange={handleChangeCliente} />
-        )}
-      </Modal>
-
-      <ConfirmDeleteModal
-        isOpen={!!rowToDelete}
-        onClose={() => setRowToDelete(null)}
-        onConfirm={handleConfirmDelete}
-        itemLabel="registro de venta"
-        itemName={getClienteById(rowToDelete?.idCliente).nombre}
-        itemId={rowToDelete?.idTransaccion}
-        itemType={rowToDelete?.categoria}
-      />
-
-      <ConfirmDeleteModal
-        isOpen={!!clienteToDelete}
-        onClose={() => setClienteToDelete(null)}
-        onConfirm={handleConfirmDeleteCliente}
-        itemLabel="registro de cliente"
-        itemName={clienteToDelete?.nombre}
-        itemId={clienteToDelete?.idCliente}
-        itemType={clienteToDelete?.tipo}
-      />
 
       <Toast
         message={toast?.message}
