@@ -9,6 +9,7 @@ import {CriasProvider} from "./context/CriasContext";
 import {AlimentosProvider} from "./context/AlimentosContext";
 import {VacunasProvider} from "./context/VacunasContext";
 import {VentasProvider} from "./context/VentasContext";
+import {BitacoraProvider} from "./context/BitacoraContext";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -19,10 +20,13 @@ createRoot(document.getElementById("root")).render(
             <AlimentosProvider>
               <VacunasProvider>
                 <VentasProvider>
-                  <App />
+                  <BitacoraProvider>
+                    <App />
+                  </BitacoraProvider>
                 </VentasProvider>
               </VacunasProvider>
             </AlimentosProvider>
+
           </CriasProvider>
         </RazasProvider>
       </ClientesProvider>

@@ -36,3 +36,19 @@ async def get_historial_medico_bovino(
     )
     result = await db.execute(stmt)
     return list(result.scalars().all())
+
+async def get_registros_medicos(
+    db: AsyncSession,
+    skip: int = 0,
+    limit: int = 100
+) -> List[RegistroMedico]:
+    """Obtiene el historial de vacunas global, ordenado por fecha de aplicación."""
+    stmt = (
+        select(RegistroMedico)
+        .order_by(RegistroMedico.fecha_aplicacion.desc())
+        .offset(skip)
+        .limit(limit)
+    )
+    result = await db.execute(stmt)
+    return list(result.scalars().all())
+
