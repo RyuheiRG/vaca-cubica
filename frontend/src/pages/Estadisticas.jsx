@@ -16,7 +16,7 @@ import {
 
 import StatCard from "../components/StatCard";
 import AsyncState from "../components/AsyncState";
-import useEstadisticas, {CHART_COLORS} from "../hooks/useEstadisticas";
+import useEstadisticas, { CHART_COLORS } from "../hooks/useEstadisticas";
 import "./Estadisticas.css";
 
 const formatoMXN = (valor) =>
@@ -57,7 +57,7 @@ const Estadisticas = () => {
             : null
         }
       >
-        <div className="stats-grid" style={{marginTop: "1.5rem"}}>
+        <div className="stats-grid" style={{ marginTop: "1.5rem" }}>
           <StatCard
             label="Total de bovinos"
             value={kpis?.totalBovinos ?? 0}
@@ -87,73 +87,89 @@ const Estadisticas = () => {
             <p className="chart-subtitle">
               Cantidad de animales registrados por raza
             </p>
-            <ResponsiveContainer width="100%" height={280}>
-              <BarChart data={bovinosPorRaza}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="nombre" tick={{fontSize: 12}} />
-                <YAxis allowDecimals={false} />
-                <Tooltip />
-                <Bar
-                  dataKey="cantidad"
-                  fill={CHART_COLORS[0]}
-                  radius={[6, 6, 0, 0]}
-                />
-              </BarChart>
-            </ResponsiveContainer>
+            {bovinosPorRaza.length === 0 ? (
+              <p className="chart-empty">
+                Aún no hay datos de bovinos por raza.
+              </p>
+            ) : (
+              <ResponsiveContainer width="100%" height={280}>
+                <BarChart data={bovinosPorRaza}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="nombre" tick={{ fontSize: 12 }} />
+                  <YAxis allowDecimals={false} />
+                  <Tooltip />
+                  <Bar
+                    dataKey="cantidad"
+                    fill={CHART_COLORS[0]}
+                    radius={[6, 6, 0, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </div>
 
           {/* Estado del hato */}
           <div className="estadisticas-card">
             <h3>Estado del hato</h3>
             <p className="chart-subtitle">Distribución actual por estado</p>
-            <ResponsiveContainer width="100%" height={280}>
-              <PieChart>
-                <Pie
-                  data={bovinosPorEstado}
-                  dataKey="cantidad"
-                  nameKey="nombre"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={95}
-                  label={({nombre, cantidad}) => `${nombre}: ${cantidad}`}
-                >
-                  {bovinosPorEstado.map((entry, index) => (
-                    <Cell
-                      key={entry.nombre}
-                      fill={CHART_COLORS[index % CHART_COLORS.length]}
-                    />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
+            {bovinosPorEstado.length === 0 ? (
+              <p className="chart-empty">
+                Aún no hay datos de estado del hato.
+              </p>
+            ) : (
+              <ResponsiveContainer width="100%" height={280}>
+                <PieChart>
+                  <Pie
+                    data={bovinosPorEstado}
+                    dataKey="cantidad"
+                    nameKey="nombre"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={95}
+                    label={({ nombre, cantidad }) => `${nombre}: ${cantidad}`}
+                  >
+                    {bovinosPorEstado.map((entry, index) => (
+                      <Cell
+                        key={entry.nombre}
+                        fill={CHART_COLORS[index % CHART_COLORS.length]}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            )}
           </div>
 
           {/* Bovinos por sexo */}
           <div className="estadisticas-card">
             <h3>Distribución por sexo</h3>
             <p className="chart-subtitle">Machos vs. hembras en el hato</p>
-            <ResponsiveContainer width="100%" height={280}>
-              <PieChart>
-                <Pie
-                  data={bovinosPorSexo}
-                  dataKey="cantidad"
-                  nameKey="nombre"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={95}
-                  label={({nombre, cantidad}) => `${nombre}: ${cantidad}`}
-                >
-                  {bovinosPorSexo.map((entry, index) => (
-                    <Cell
-                      key={entry.nombre}
-                      fill={CHART_COLORS[(index + 1) % CHART_COLORS.length]}
-                    />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
+            {bovinosPorSexo.length === 0 ? (
+              <p className="chart-empty">Aún no hay datos de sexo del hato.</p>
+            ) : (
+              <ResponsiveContainer width="100%" height={280}>
+                <PieChart>
+                  <Pie
+                    data={bovinosPorSexo}
+                    dataKey="cantidad"
+                    nameKey="nombre"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={95}
+                    label={({ nombre, cantidad }) => `${nombre}: ${cantidad}`}
+                  >
+                    {bovinosPorSexo.map((entry, index) => (
+                      <Cell
+                        key={entry.nombre}
+                        fill={CHART_COLORS[(index + 1) % CHART_COLORS.length]}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            )}
           </div>
 
           {/* Peso promedio de ingreso vs peso adulto de referencia, por raza */}
@@ -165,7 +181,7 @@ const Estadisticas = () => {
             <ResponsiveContainer width="100%" height={280}>
               <BarChart data={pesoPorRaza}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="raza" tick={{fontSize: 12}} />
+                <XAxis dataKey="raza" tick={{ fontSize: 12 }} />
                 <YAxis />
                 <Tooltip />
                 <Legend />
@@ -199,7 +215,7 @@ const Estadisticas = () => {
               <ResponsiveContainer width="100%" height={280}>
                 <LineChart data={evolucionPeso}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="mes" tick={{fontSize: 12}} />
+                  <XAxis dataKey="mes" tick={{ fontSize: 12 }} />
                   <YAxis domain={["auto", "auto"]} />
                   <Tooltip />
                   <Line
@@ -208,7 +224,7 @@ const Estadisticas = () => {
                     name="Peso promedio"
                     stroke={CHART_COLORS[1]}
                     strokeWidth={2}
-                    dot={{r: 3}}
+                    dot={{ r: 3 }}
                   />
                 </LineChart>
               </ResponsiveContainer>
@@ -225,7 +241,7 @@ const Estadisticas = () => {
               <ResponsiveContainer width="100%" height={280}>
                 <BarChart data={ventasPorMes}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="mes" tick={{fontSize: 12}} />
+                  <XAxis dataKey="mes" tick={{ fontSize: 12 }} />
                   <YAxis />
                   <Tooltip formatter={(valor) => formatoMXN(valor)} />
                   <Bar
@@ -255,7 +271,7 @@ const Estadisticas = () => {
                     cx="50%"
                     cy="50%"
                     outerRadius={95}
-                    label={({nombre, cantidad}) => `${nombre}: ${cantidad}`}
+                    label={({ nombre, cantidad }) => `${nombre}: ${cantidad}`}
                   >
                     {partosPorTipo.map((entry, index) => (
                       <Cell

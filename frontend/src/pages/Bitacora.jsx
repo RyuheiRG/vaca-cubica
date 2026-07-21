@@ -373,8 +373,6 @@ const Bitacora = () => {
         <DataTable
           columns={currentConfig.columns}
           data={pageData} // Renderiza solo el slice paginado
-          onEdit={() => {}}
-          onDelete={() => {}}
         />
 
         <Pagination
