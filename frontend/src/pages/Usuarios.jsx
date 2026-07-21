@@ -6,6 +6,7 @@ import DataTable from "../components/DataTable";
 import Modal from "../components/Modal";
 import Toast from "../components/Toast";
 import DynamicForm from "../components/DynamicForm";
+import { getFormErrorMessage } from "../utils/errorMessage";
 import api from "../services/api";
 import "./Catalogo.css";
 
@@ -31,7 +32,10 @@ const Usuarios = () => {
       setUsuarios(data);
     } catch (err) {
       setToast({
-        message: "No se pudo cargar la lista de usuarios.",
+        message: getFormErrorMessage(
+          err,
+          "No se pudo cargar la lista de usuarios.",
+        ),
         type: "error",
       });
     } finally {
@@ -82,9 +86,10 @@ const Usuarios = () => {
       setModalOpen(false);
       cargarUsuarios();
     } catch (err) {
-      const detail =
-        err.response?.data?.detail || "Ocurrió un error al guardar.";
-      setToast({ message: detail, type: "error" });
+      setToast({
+        message: getFormErrorMessage(err, "Ocurrió un error al guardar."),
+        type: "error",
+      });
     }
   };
 
@@ -101,7 +106,10 @@ const Usuarios = () => {
       });
       cargarUsuarios();
     } catch (err) {
-      setToast({ message: "No se pudo actualizar el estado.", type: "error" });
+      setToast({
+        message: getFormErrorMessage(err, "No se pudo actualizar el estado."),
+        type: "error",
+      });
     }
   };
 

@@ -21,3 +21,16 @@ export function getFriendlyErrorMessage(err) {
 
   return "Ocurrió un error al cargar los datos. Intenta de nuevo.";
 }
+
+export function getFormErrorMessage(
+  err,
+  fallback = "Ocurrió un error al guardar.",
+) {
+  const detail = err?.response?.data?.detail;
+  if (!detail) return fallback;
+  if (typeof detail === "string") return detail;
+  if (Array.isArray(detail)) {
+    return detail.map((e) => e.msg || JSON.stringify(e)).join(" · ");
+  }
+  return fallback;
+}

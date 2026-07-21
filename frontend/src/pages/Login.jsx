@@ -39,7 +39,8 @@ const Login = () => {
     setLoading(true);
     try {
       await login(email.trim(), password);
-      await Promise.all([
+
+      const resultados = await Promise.allSettled([
         refetchBovinos(),
         refetchRazas(),
         refetchClientes(),
@@ -48,6 +49,12 @@ const Login = () => {
         refetchVacunas(),
         refetchUser(),
       ]);
+
+      resultados.forEach((r) => {
+        if (r.status === "rejected")
+          console.error("Error cargando datos iniciales:", r.reason);
+      });
+
       navigate("/");
     } catch (err) {
       if (err.response?.status === 401) {

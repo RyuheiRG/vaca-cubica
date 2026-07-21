@@ -13,6 +13,7 @@ import { useCrias } from "../context/CriasContext";
 import { useAlimentos } from "../context/AlimentosContext";
 import { useVacunas } from "../context/VacunasContext";
 import "./Catalogo.css";
+import { getFormErrorMessage } from "../utils/errorMessage";
 
 const capitalize = (str) =>
   str ? str.charAt(0).toUpperCase() + str.slice(1) : str;
@@ -296,7 +297,7 @@ const Catalogo = () => {
       });
     } catch (err) {
       setToast({
-        message: err.response?.data?.detail || "No se pudo guardar el registro",
+        message: getFormErrorMessage(err, "No se pudo guardar el registro"),
         type: "error",
       });
     } finally {
@@ -325,8 +326,7 @@ const Catalogo = () => {
       });
     } catch (err) {
       setToast({
-        message:
-          err.response?.data?.detail || "No se pudo actualizar el registro",
+        message: getFormErrorMessage(err, "No se pudo actualizar el registro"),
         type: "error",
       });
     } finally {
@@ -349,9 +349,10 @@ const Catalogo = () => {
       });
     } catch (err) {
       setToast({
-        message:
-          err.response?.data?.detail ||
+        message: getFormErrorMessage(
+          err,
           "No se pudo eliminar (revisa si ya tiene historial asociado)",
+        ),
         type: "error",
       });
     } finally {

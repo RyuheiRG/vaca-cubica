@@ -29,6 +29,18 @@ async def registrar_racion(
             detail="Ya existe un registro exacto de esta ración para el bovino en esta fecha."
         )
 
+@router.get("/", response_model=List[DietaDiariaResponse])
+async def listar_dietas(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(500, ge=1, le=1000),
+    db: AsyncSession = Depends(get_db),
+    current_user: Usuario = Depends(get_current_user)
+):
+    """Devuelve todo el historial de alimentación del hato."""
+    return await crud_dieta.get_dietas(
+        db=db, skip=skip, limit=limit
+    )
+
 @router.get("/bovino/{bovino_id}", response_model=List[DietaDiariaResponse])
 async def obtener_historial_dieta(
     bovino_id: int,
@@ -40,15 +52,3 @@ async def obtener_historial_dieta(
     return await crud_dieta.get_dieta_bovino(
         db=db, bovino_id=bovino_id, skip=skip, limit=limit
     )
-
-@router.get("/", response_model=List[DietaDiariaResponse])
-async def listar_dietas(
-    skip: int = Query(0, ge=0),
-    limit: int = Query(500, ge=1, le=1000),
-    db: AsyncSession = Depends(get_db),
-    current_user: Usuario = Depends(get_current_user)
-):
-    """Devuelve todo el historial de alimentación del hato."""
-    return await crud_dieta.get_dietas(
-        db=db, skip=skip, limit=limit
-    )

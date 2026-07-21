@@ -20,6 +20,21 @@ async def create_dieta(
     
     return db_dieta
 
+async def get_dietas(
+    db: AsyncSession,
+    skip: int = 0,
+    limit: int = 100
+) -> List[DietaDiaria]:
+    """Obtiene el historial global de alimentación."""
+    stmt = (
+        select(DietaDiaria)
+        .order_by(DietaDiaria.fecha.desc())
+        .offset(skip)
+        .limit(limit)
+    )
+    result = await db.execute(stmt)
+    return list(result.scalars().all())
+
 async def get_dieta_bovino(
     db: AsyncSession, 
     bovino_id: int,
@@ -36,18 +51,3 @@ async def get_dieta_bovino(
     )
     result = await db.execute(stmt)
     return list(result.scalars().all())
-
-async def get_dietas(
-    db: AsyncSession,
-    skip: int = 0,
-    limit: int = 100
-) -> List[DietaDiaria]:
-    """Obtiene el historial global de alimentación."""
-    stmt = (
-        select(DietaDiaria)
-        .order_by(DietaDiaria.fecha.desc())
-        .offset(skip)
-        .limit(limit)
-    )
-    result = await db.execute(stmt)
-    return list(result.scalars().all())

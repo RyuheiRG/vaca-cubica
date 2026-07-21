@@ -1,5 +1,5 @@
-import {useState, useMemo} from "react";
-import {User, ArrowRight} from "lucide-react";
+import { useState, useMemo } from "react";
+import { User, ArrowRight } from "lucide-react";
 import Button from "../components/Button";
 import DataTable from "../components/DataTable";
 import Modal from "../components/Modal";
@@ -8,16 +8,17 @@ import Tabs from "../components/Tabs";
 import FilterBar from "../components/FilterBar";
 import VentaForm from "../components/VentaForm";
 import ClienteForm from "../components/ClienteForm";
-import {useBovinos} from "../context/BovinosContext";
-import {useClientes} from "../context/ClientesContext";
-import {useVentas} from "../context/VentasContext";
+import { useBovinos } from "../context/BovinosContext";
+import { useClientes } from "../context/ClientesContext";
+import { useVentas } from "../context/VentasContext";
+import { getFormErrorMessage } from "../utils/errorMessage";
 import "./Ventas.css";
 
 const formatMoney = (value) =>
-  `$${Number(value).toLocaleString("es-MX", {minimumFractionDigits: 2})} MXN`;
+  `$${Number(value).toLocaleString("es-MX", { minimumFractionDigits: 2 })} MXN`;
 
 const movimientoColumns = (getBovinoById, getClienteById) => [
-  {key: "idLabel", label: "ID"},
+  { key: "idLabel", label: "ID" },
   {
     key: "bovino",
     label: "Bovino",
@@ -31,15 +32,15 @@ const movimientoColumns = (getBovinoById, getClienteById) => [
     label: "Cliente",
     render: (row) => getClienteById(row.cliente_id).nombre,
   },
-  {key: "categoria", label: "Categoría", badge: true},
-  {key: "costoLabel", label: "Costo"},
-  {key: "fechaLabel", label: "Fecha"},
+  { key: "categoria", label: "Categoría", badge: true },
+  { key: "costoLabel", label: "Costo" },
+  { key: "fechaLabel", label: "Fecha" },
 ];
 
 const clienteColumns = [
-  {key: "id", label: "ID"},
-  {key: "nombre", label: "Nombre / Empresa"},
-  {key: "telefono", label: "Teléfono"},
+  { key: "id", label: "ID" },
+  { key: "nombre", label: "Nombre / Empresa" },
+  { key: "telefono", label: "Teléfono" },
 ];
 
 const emptyVenta = {
@@ -62,7 +63,11 @@ const filterConfig = {
   movimientos: {
     placeholder: "Buscar por cliente, bovino...",
     filters: [
-      {key: "categoria", placeholder: "Categoría", options: ["Venta", "Renta"]},
+      {
+        key: "categoria",
+        placeholder: "Categoría",
+        options: ["Venta", "Renta"],
+      },
     ],
   },
   clientes: {
@@ -72,9 +77,9 @@ const filterConfig = {
 };
 
 const Ventas = () => {
-  const {bovinos, getBovinoById} = useBovinos();
-  const {clientes, createCliente, getClienteById} = useClientes();
-  const {ventas, rentas, createVenta, createRenta} = useVentas();
+  const { bovinos, getBovinoById } = useBovinos();
+  const { clientes, createCliente, getClienteById } = useClientes();
+  const { ventas, rentas, createVenta, createRenta } = useVentas();
 
   const [activeTab, setActiveTab] = useState("movimientos");
 
@@ -91,8 +96,6 @@ const Ventas = () => {
   const [search, setSearch] = useState("");
   const [filterValues, setFilterValues] = useState({});
 
-  // El backend solo permite vender bovinos activos, y solo rentar
-  // sementales (machos, activos, marcados como semental).
   const bovinosParaVenta = useMemo(
     () => bovinos.filter((b) => b.estado === "activo"),
     [bovinos],
@@ -136,8 +139,8 @@ const Ventas = () => {
   }, [ventas, rentas]);
 
   const tabs = [
-    {key: "movimientos", label: "Movimientos", count: movimientos.length},
-    {key: "clientes", label: "Clientes", count: clientes.length},
+    { key: "movimientos", label: "Movimientos", count: movimientos.length },
+    { key: "clientes", label: "Clientes", count: clientes.length },
   ];
 
   const filteredMovimientos = useMemo(() => {
@@ -177,7 +180,7 @@ const Ventas = () => {
   };
 
   const handleFilterChange = (key, value) => {
-    setFilterValues((prev) => ({...prev, [key]: value}));
+    setFilterValues((prev) => ({ ...prev, [key]: value }));
   };
 
   const handleOpenVentaModal = () => {
@@ -186,7 +189,7 @@ const Ventas = () => {
   };
 
   const handleNewVentaChange = (field, value) => {
-    setNewVenta((prev) => ({...prev, [field]: value}));
+    setNewVenta((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleCreateVenta = async () => {
@@ -215,8 +218,7 @@ const Ventas = () => {
       });
     } catch (err) {
       setToast({
-        message:
-          err.response?.data?.detail || "No se pudo registrar el movimiento",
+        message: getFormErrorMessage(err, "No se pudo registrar el movimiento"),
         type: "error",
       });
     } finally {
@@ -230,7 +232,7 @@ const Ventas = () => {
   };
 
   const handleNewClienteChange = (field, value) => {
-    setNewCliente((prev) => ({...prev, [field]: value}));
+    setNewCliente((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleCreateCliente = async () => {
@@ -238,11 +240,13 @@ const Ventas = () => {
     try {
       await createCliente(newCliente);
       setShowClienteModal(false);
-      setToast({message: "Cliente registrado correctamente", type: "success"});
+      setToast({
+        message: "Cliente registrado correctamente",
+        type: "success",
+      });
     } catch (err) {
       setToast({
-        message:
-          err.response?.data?.detail || "No se pudo registrar el cliente",
+        message: getFormErrorMessage(err, "No se pudo registrar el cliente"),
         type: "error",
       });
     } finally {
@@ -259,7 +263,7 @@ const Ventas = () => {
         </div>
       </div>
 
-      <div style={{display: "flex", gap: "1rem", marginTop: "1.5rem"}}>
+      <div style={{ display: "flex", gap: "1rem", marginTop: "1.5rem" }}>
         <Button icon="+" onClick={handleOpenVentaModal}>
           Registrar Venta o Renta de Bovino
         </Button>

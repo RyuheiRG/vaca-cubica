@@ -22,8 +22,8 @@ export const BitacoraProvider = ({ children }) => {
     try {
       const [resPesajes, resMedicos, resDietas] = await Promise.all([
         api.get("/api/pesajes/"),
-        api.get("/api/medico/"),
-        api.get("/api/dieta/"),
+        api.get("/api/registro-medico/"),
+        api.get("/api/dieta-diaria/"),
       ]);
 
       setPesajes(resPesajes.data);
@@ -47,13 +47,13 @@ export const BitacoraProvider = ({ children }) => {
   };
 
   const createRegistroMedico = async (medicoIn) => {
-    const { data } = await api.post("/api/medico/", medicoIn);
+    const { data } = await api.post("/api/registro-medico/", medicoIn);
     setRegistrosMedicos((prev) => [data, ...prev]);
     return data;
   };
 
   const createDieta = async (dietaIn) => {
-    const { data } = await api.post("/api/dieta/", dietaIn);
+    const { data } = await api.post("/api/dieta-diaria/", dietaIn);
     setDietas((prev) => [data, ...prev]);
     return data;
   };

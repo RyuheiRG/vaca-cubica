@@ -29,6 +29,18 @@ async def registrar_vacuna(
             detail="El bovino ya recibió esta vacuna en la fecha indicada."
         )
 
+@router.get("/", response_model=List[RegistroMedicoResponse])
+async def listar_registros_medicos(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(500, ge=1, le=1000),
+    db: AsyncSession = Depends(get_db),
+    current_user: Usuario = Depends(get_current_user)
+):
+    """Devuelve todo el historial médico del hato."""
+    return await crud_medico.get_registros_medicos(
+        db=db, skip=skip, limit=limit
+    )
+
 @router.get("/bovino/{bovino_id}", response_model=List[RegistroMedicoResponse])
 async def obtener_historial_medico(
     bovino_id: int,
@@ -40,15 +52,3 @@ async def obtener_historial_medico(
     return await crud_medico.get_historial_medico_bovino(
         db=db, bovino_id=bovino_id, skip=skip, limit=limit
     )
-
-@router.get("/", response_model=List[RegistroMedicoResponse])
-async def listar_registros_medicos(
-    skip: int = Query(0, ge=0),
-    limit: int = Query(500, ge=1, le=1000),
-    db: AsyncSession = Depends(get_db),
-    current_user: Usuario = Depends(get_current_user)
-):
-    """Devuelve todo el historial médico del hato."""
-    return await crud_medico.get_registros_medicos(
-        db=db, skip=skip, limit=limit
-    )

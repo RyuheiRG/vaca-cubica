@@ -38,19 +38,20 @@ const TIPO_BAJA_LABELS = {
 
 const mesLabel = (fechaISO) => {
   const d = new Date(fechaISO);
-  const label = d.toLocaleDateString("es-MX", { month: "short", year: "2-digit" });
+  const label = d.toLocaleDateString("es-MX", {
+    month: "short",
+    year: "2-digit",
+  });
   return label.charAt(0).toUpperCase() + label.slice(1);
 };
 
-// Agrupa una lista por mes (YYYY-MM) devolviendo un total/promedio, y regresa
-// los meses ya ordenados cronológicamente con etiqueta legible en español.
 const agruparPorMes = (items, fechaKey, valorKey, modo = "suma") => {
   const grupos = new Map();
 
   items.forEach((item) => {
     const fecha = item[fechaKey];
     if (!fecha) return;
-    const clave = fecha.slice(0, 7); // YYYY-MM
+    const clave = fecha.slice(0, 7);
     const valor = Number(item[valorKey]);
 
     if (!grupos.has(clave)) {
@@ -65,7 +66,10 @@ const agruparPorMes = (items, fechaKey, valorKey, modo = "suma") => {
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([clave, g]) => ({
       mes: mesLabel(g.fecha),
-      valor: modo === "promedio" ? Number((g.total / g.cantidad).toFixed(1)) : Number(g.total.toFixed(2)),
+      valor:
+        modo === "promedio"
+          ? Number((g.total / g.cantidad).toFixed(1))
+          : Number(g.total.toFixed(2)),
     }));
 };
 
@@ -122,7 +126,10 @@ export const useEstadisticas = () => {
 
     // --- Bovinos por raza ---
     const bovinosPorRaza = contarPor(
-      bovinos.map((b) => ({ ...b, raza: razaById.get(b.raza_id)?.nombre || `Raza #${b.raza_id}` })),
+      bovinos.map((b) => ({
+        ...b,
+        raza: razaById.get(b.raza_id)?.nombre || `Raza #${b.raza_id}`,
+      })),
       "raza",
     ).map((item) => ({ nombre: item.nombre, cantidad: item.cantidad }));
 
@@ -133,21 +140,32 @@ export const useEstadisticas = () => {
     const bovinosPorSexo = contarPor(bovinos, "sexo", SEXO_LABELS);
 
     // --- Peso promedio de ingreso por raza, vs peso adulto de referencia ---
-    const pesoPorRaza = razas.map((raza) => {
-      const deLaRaza = bovinos.filter((b) => b.raza_id === raza.id);
-      const promedioIngreso = deLaRaza.length
-        ? deLaRaza.reduce((acc, b) => acc + Number(b.peso_ingreso), 0) / deLaRaza.length
-        : 0;
-      return {
-        raza: raza.nombre,
-        pesoIngresoPromedio: Number(promedioIngreso.toFixed(1)),
-        pesoAdultoReferencia: Number(raza.peso_promedio_adulto),
-      };
-    }).filter((r) => r.pesoIngresoPromedio > 0);
+    const pesoPorRaza = razas
+      .map((raza) => {
+        const deLaRaza = bovinos.filter((b) => b.raza_id === raza.id);
+        const promedioIngreso = deLaRaza.length
+          ? deLaRaza.reduce((acc, b) => acc + Number(b.peso_ingreso), 0) /
+            deLaRaza.length
+          : 0;
+        return {
+          raza: raza.nombre,
+          pesoIngresoPromedio: Number(promedioIngreso.toFixed(1)),
+          pesoAdultoReferencia: Number(raza.peso_promedio_adulto),
+        };
+      })
+      .filter((r) => r.pesoIngresoPromedio > 0);
 
     // --- Ventas por mes e ingreso total ---
-    const ventasPorMes = agruparPorMes(ventas, "fecha_venta", "precio_final", "suma");
-    const ingresoTotalVentas = ventas.reduce((acc, v) => acc + Number(v.precio_final), 0);
+    const ventasPorMes = agruparPorMes(
+      ventas,
+      "fecha_venta",
+      "precio_final",
+      "suma",
+    );
+    const ingresoTotalVentas = ventas.reduce(
+      (acc, v) => acc + Number(v.precio_final),
+      0,
+    );
 
     // --- Partos por tipo ---
     const partosPorTipo = contarPor(partos, "tipo_parto", TIPO_PARTO_LABELS);
@@ -156,13 +174,23 @@ export const useEstadisticas = () => {
     const bajasPorTipo = contarPor(bajas, "tipo", TIPO_BAJA_LABELS);
 
     // --- Evolución del peso promedio del hato, mes a mes ---
-    const evolucionPeso = agruparPorMes(pesajes, "fecha", "peso_kg", "promedio");
+    const evolucionPeso = agruparPorMes(
+      pesajes,
+      "fecha",
+      "peso_kg",
+      "promedio",
+    );
 
     // --- KPIs generales ---
     const totalBovinos = bovinos.length;
     const bovinosActivos = bovinos.filter((b) => b.estado === "activo").length;
     const pesoPromedioIngreso = totalBovinos
-      ? Number((bovinos.reduce((acc, b) => acc + Number(b.peso_ingreso), 0) / totalBovinos).toFixed(1))
+      ? Number(
+          (
+            bovinos.reduce((acc, b) => acc + Number(b.peso_ingreso), 0) /
+            totalBovinos
+          ).toFixed(1),
+        )
       : 0;
 
     return {
