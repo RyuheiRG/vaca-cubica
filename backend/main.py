@@ -41,6 +41,9 @@ origenes_permitidos = [
     "http://localhost:5173",
     "http://localhost:5174",
     "https://vaca-cubica.vercel.app",
+    "https://vacacubica.hopto.org",
+    "https://vacacubica-app.hopto.org",
+    "http://98.88.237.157",
     # "https://dominio-futuro.com"
 ]
 
